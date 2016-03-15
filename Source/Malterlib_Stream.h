@@ -7,6 +7,8 @@
 //#include <boost/type_traits.hpp>
 #include <Mib/Storage/Indirection>
 
+#define DMibIncluded_Stream
+
 namespace NMib
 {
 
@@ -1299,3 +1301,7 @@ namespace NMib
 
 	}
 }
+
+#ifdef DMibIncluded_IntusiveAVLTree
+#	include "../../Intrusive/Source/Malterlib_Intrusive_AVLTree_Stream.h"
+#endif
