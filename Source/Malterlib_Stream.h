@@ -242,22 +242,22 @@ namespace NMib
 			DMibClassNoCopyAllowed(CBinaryStream);
 
 		protected:
-			virtual void fp_FeedBytes(const void *_pMem, mint _nBytes) pure;
-			virtual void fp_ConsumeBytes(void *_pMem, mint _nBytes) pure;
-			virtual bint fp_IsValid() const pure;
-			virtual bint fp_IsAtEndOfStream() const pure;
-			virtual CFilePos fp_GetPosition() const pure;
-			virtual void fp_SetPosition(CFilePos _Pos) pure;
-			virtual void fp_SetPositionFromEnd(CFilePos _Pos) pure;
-			virtual void fp_AddPosition(CFilePos _Pos) pure;
-			virtual bint fp_IsValidReadPosition(NStream::CFilePos _Pos) const pure;
-			virtual void fp_Flush(bint _bLocalCacheOnly) pure;
-			virtual void fp_SetCacheSize(mint _CacheSize) pure;
-			virtual CFilePos fp_GetLength() const pure;
-			virtual void fp_SetLength(CFilePos _Length) pure;
-			virtual	aint fp_LengthSize() const pure;
-			virtual aint fp_Endian() const pure;
-			virtual void fp_FeedFromStream(CBinaryStream &_Stream, CFilePos _nBytes) pure;
+			virtual void fp_FeedBytes(const void *_pMem, mint _nBytes) = 0;
+			virtual void fp_ConsumeBytes(void *_pMem, mint _nBytes) = 0;
+			virtual bint fp_IsValid() const = 0;
+			virtual bint fp_IsAtEndOfStream() const = 0;
+			virtual CFilePos fp_GetPosition() const = 0;
+			virtual void fp_SetPosition(CFilePos _Pos) = 0;
+			virtual void fp_SetPositionFromEnd(CFilePos _Pos) = 0;
+			virtual void fp_AddPosition(CFilePos _Pos) = 0;
+			virtual bint fp_IsValidReadPosition(NStream::CFilePos _Pos) const = 0;
+			virtual void fp_Flush(bint _bLocalCacheOnly) = 0;
+			virtual void fp_SetCacheSize(mint _CacheSize) = 0;
+			virtual CFilePos fp_GetLength() const = 0;
+			virtual void fp_SetLength(CFilePos _Length) = 0;
+			virtual	aint fp_LengthSize() const = 0;
+			virtual aint fp_Endian() const = 0;
+			virtual void fp_FeedFromStream(CBinaryStream &_Stream, CFilePos _nBytes) = 0;
 
 		public:
 			virtual ~CBinaryStream(){}
