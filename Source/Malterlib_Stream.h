@@ -1063,7 +1063,7 @@ namespace NMib
 					_Stream.f_FeedBytes(&_Data, sizeof(_Data));\
 				else\
 				{\
-					_Type Temp = fg_ByteSwap(_Data);\
+					auto Temp = fg_ByteSwap(reinterpret_cast<typename NTraits::TCIntFromSize<sizeof(_Data)>::CType const &>(_Data));\
 					_Stream.f_FeedBytes(&Temp, sizeof(_Data));\
 				} \
 			}\
@@ -1074,12 +1074,13 @@ namespace NMib
 					_Stream.f_ConsumeBytes(&_Data, sizeof(_Data));\
 				else\
 				{\
-					_Stream.f_ConsumeBytes(&_Data, sizeof(_Data));\
-					_Data = fg_ByteSwap(_Data);\
+					typename NTraits::TCIntFromSize<sizeof(_Data)>::CType Data;\
+					_Stream.f_ConsumeBytes(&Data, sizeof(Data));\
+					_Data = reinterpret_cast<_Type &>(Data);\
 				}\
 			}\
 		};
-
+		
 #		define DMibStreamImplementSimpleEndianSwappedTypeUnsafe(_Type) DMibStreamImplementSimpleTypeDefault(_Type) \
 		template <typename t_CStream> \
 		class TCBinaryStreamTypeReference<t_CStream, NMib::NStream::TCBinaryStreamUnsafeWrapper<const _Type> > \
