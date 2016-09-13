@@ -1168,6 +1168,23 @@ namespace NMib
 			}\
 		};
 
+		template <typename t_CStream>
+		class TCBinaryStreamTypeReference<t_CStream, bool>
+		{
+		public:
+			static void fs_Feed(t_CStream &_Stream, bool const &_Data)
+			{
+				uint8 Byte = _Data ? 1 : 0;
+				_Stream.f_FeedBytes(&Byte, sizeof(Byte));
+			}
+			static void fs_Consume(t_CStream &_Stream, bool &_Data)
+			{
+				uint8 Byte;
+				_Stream.f_ConsumeBytes(&Byte, sizeof(Byte));
+				_Data = Byte != 0;
+			}
+		};
+		
 		DMibStreamImplementSimpleType(int8);
 		DMibStreamImplementSimpleEndianSwappedType(int16);
 		DMibStreamImplementSimpleEndianSwappedType(int32);
