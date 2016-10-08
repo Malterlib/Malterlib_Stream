@@ -1076,7 +1076,7 @@ namespace NMib
 				{\
 					typename NTraits::TCIntFromSize<sizeof(_Data)>::CType Data;\
 					_Stream.f_ConsumeBytes(&Data, sizeof(Data));\
-					_Data = reinterpret_cast<_Type &>(Data);\
+					_Data = fg_ByteSwap(reinterpret_cast<_Type &>(Data));\
 				}\
 			}\
 		};
