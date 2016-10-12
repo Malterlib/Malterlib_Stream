@@ -364,6 +364,13 @@ namespace NMib
 				m_Length = _Buffer.f_GetLen();
 			}
 
+			CBinaryStreamMemoryRef(CStorage &_Buffer, mint _Length)
+				: m_Buffer(_Buffer)
+			{
+				m_Position = 0;
+				m_Length = _Length;
+			}
+
 			~CBinaryStreamMemoryRef()
 			{
 				m_Buffer.f_SetLen(m_Length, false);
