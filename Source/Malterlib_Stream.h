@@ -259,6 +259,11 @@ namespace NMib
 			virtual aint fp_Endian() const = 0;
 			virtual void fp_FeedFromStream(CBinaryStream &_Stream, CFilePos _nBytes) = 0;
 
+			inline_never void fp_ThrowEndOfStreamException()
+			{
+				DMibError("End of stream Overrun");
+			}
+			
 		public:
 			virtual ~CBinaryStream(){}
 

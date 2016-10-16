@@ -200,8 +200,8 @@ namespace NMib
 
 			void f_ConsumeBytes(void *_pMem, mint _nBytes)
 			{
-				if (m_Length < (m_Position + _nBytes) )
-					DMibError("End of stream Overrun");
+				if (unlikely(m_Length < (m_Position + _nBytes)))
+					this->fp_ThrowEndOfStreamException();
 
 				NMem::fg_MemCopy(_pMem, m_pBuffer + m_Position, _nBytes);
 				m_Position += _nBytes;
@@ -409,8 +409,8 @@ namespace NMib
 
 			void f_ConsumeBytes(void *_pMem, mint _nBytes)
 			{
-				if (m_Length < (m_Position + _nBytes) )
-					DMibError("End of stream Overrun");
+				if (unlikely(m_Length < (m_Position + _nBytes)))
+					this->fp_ThrowEndOfStreamException();
 
 				NMem::fg_MemCopy(_pMem, m_Buffer.f_GetArray() + m_Position, _nBytes);
 				m_Position += _nBytes;
@@ -561,8 +561,8 @@ namespace NMib
 
 			void f_ConsumeBytes(void *_pMem, mint _nBytes)
 			{
-				if (m_Length < (m_Position + _nBytes) )
-					DMibError("End of stream Overrun");
+				if (unlikely(m_Length < (m_Position + _nBytes)))
+					this->fp_ThrowEndOfStreamException();;
 
 				NMem::fg_MemCopy(_pMem, m_Buffer.f_GetArray() + m_Position, _nBytes);
 				m_Position += _nBytes;
@@ -690,8 +690,8 @@ namespace NMib
 
 			void f_FeedBytes(const void *_pMem, mint _nBytes)
 			{
-				if (m_MaxLength < (m_Position + _nBytes) )
-					DMibError("End of stream Overrun");
+				if (unlikely(m_MaxLength < (m_Position + _nBytes)))
+					this->fp_ThrowEndOfStreamException();;
 
 				NMem::fg_MemCopy(m_pMemoryData + m_Position, _pMem, _nBytes);
 				m_Position += _nBytes;
@@ -701,8 +701,8 @@ namespace NMib
 
 			void f_ConsumeBytes(void *_pMem, mint _nBytes)
 			{
-				if (m_Length < (m_Position + _nBytes) )
-					DMibError("End of stream Overrun");
+				if (unlikely(m_Length < (m_Position + _nBytes)))
+					this->fp_ThrowEndOfStreamException();;
 
 				NMem::fg_MemCopy(_pMem, m_pMemoryData + m_Position, _nBytes);
 				m_Position += _nBytes;
@@ -758,13 +758,11 @@ namespace NMib
 
 			void f_SetLength(NStream::CFilePos _Length) 
 			{ 
-				if (_Length > NStream::CFilePos(m_MaxLength))
-					DMibError("End of stream Overrun");
+				if (unlikely(_Length > NStream::CFilePos(m_MaxLength)))
+					this->fp_ThrowEndOfStreamException();;
 
 				if (_Length > NStream::CFilePos(m_Length))
-				{
 					NMem::fg_MemClear(m_pMemoryData + m_Length, _Length - m_Length);
-				}
 				m_Length = _Length;
 			}
 			void *f_GetBuffer()
@@ -855,8 +853,8 @@ namespace NMib
 
 			void f_ConsumeBytes(void *_pMem, mint _nBytes)
 			{
-				if (m_Length < (m_Position + _nBytes) )
-					DMibError("End of stream Overrun");
+				if (unlikely(m_Length < (m_Position + _nBytes)))
+					this->fp_ThrowEndOfStreamException();;
 
 				NMem::fg_MemCopy(_pMem, m_pMemoryData + m_Position, _nBytes);
 				m_Position += _nBytes;
