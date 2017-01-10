@@ -35,7 +35,7 @@ namespace NMib
 		class TCBinaryStreamTypeReference
 		{
 		public:
-			template <typename tf_CData, typename NMib::TCDisableIf<NMib::NTraits::TCIsEnum<tf_CData>::mc_Value, void>::CType * = nullptr>
+			template <typename tf_CData, typename NMib::TCDisableIf<NMib::NTraits::TCIsEnum<typename NTraits::TCRemoveReference<tf_CData>::CType>::mc_Value, void>::CType * = nullptr>
 			inline_small static auto fs_Feed(t_CStream &_Stream, tf_CData &&_Data)
 			{
 				return fg_Forward<tf_CData>(_Data).f_Feed(_Stream);
