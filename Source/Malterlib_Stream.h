@@ -1,4 +1,4 @@
-﻿// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB 
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #pragma once
@@ -28,25 +28,209 @@ namespace NMib
 #		ifndef DMibPNoShortCuts
 #			define DErrorStreamVersionMismatch(_Description) DMibErrorStreamVersionMismatch(_Description)
 #		endif
-
+		
 		typedef CMibFilePos CFilePos;
+		
+		enum EStreamDirection
+		{
+			EStreamDirection_Feed
+			, EStreamDirection_Consume 
+		};	
 
+		template <typename t_CStream, typename t_CData>
+		class TCBinaryStreamTypeReference;
+		
+		template <typename t_CStream, typename t_CData>
+		class TCBinaryStreamTypeReferenceStream;
+
+		template <typename t_CStream, typename t_CData>
+		class TCBinaryStreamTypePtr;
+		
+#		define DMibStreamImplementOperators(_Class) \
+			template <typename tf_CData>	inline_small auto f_Feed(tf_CData &&_Data){return NMib::NStream::TCBinaryStreamTypeReference<_Class, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Feed(*this, NMib::fg_Forward<tf_CData>(_Data));} \
+			template <typename tf_CData> inline_small auto f_Feed(const tf_CData *_pData){return NMib::NStream::TCBinaryStreamTypePtr<_Class, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Feed(*this, _pData);} \
+			template <typename tf_CData>	inline_small auto f_Consume(tf_CData &&_Data){return NMib::NStream::TCBinaryStreamTypeReference<_Class, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Consume(*this, NMib::fg_Forward<tf_CData>(_Data));} \
+			template <typename tf_CData> inline_small auto f_Consume(tf_CData *_pData){return NMib::NStream::TCBinaryStreamTypePtr<_Class, tf_CData>::fs_Consume(*this, _pData);} \
+			template <typename tf_CData>	inline_small auto f_Stream(tf_CData &&_Data){return NMib::NStream::TCBinaryStreamTypeReferenceStream<_Class, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Stream(*this, NMib::fg_Forward<tf_CData>(_Data));}
+		
+		template <typename t_CStream, EStreamDirection t_Direction>
+		struct TCStreamDirection : public t_CStream
+		{
+//			DMibStreamImplementOperators(t_CStream);
+			
+			template <typename tf_CData>	inline_small auto f_Feed(tf_CData &&_Data)
+			{
+				return NMib::NStream::TCBinaryStreamTypeReference<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Feed(*this, NMib::fg_Forward<tf_CData>(_Data));
+			}
+			template <typename tf_CData> inline_small auto f_Feed(const tf_CData *_pData)
+			{
+				return NMib::NStream::TCBinaryStreamTypePtr<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Feed(*this, _pData);
+			}
+			template <typename tf_CData>	inline_small auto f_Consume(tf_CData &&_Data)
+			{
+				return NMib::NStream::TCBinaryStreamTypeReference<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Consume(*this, NMib::fg_Forward<tf_CData>(_Data));
+			}
+			template <typename tf_CData> inline_small auto f_Consume(tf_CData *_pData)
+			{
+				return NMib::NStream::TCBinaryStreamTypePtr<t_CStream, tf_CData>::fs_Consume(*this, _pData);
+			}
+			template <typename tf_CData>	inline_small auto f_Stream(tf_CData &&_Data)
+			{
+				return NMib::NStream::TCBinaryStreamTypeReferenceStream<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Stream(*this, NMib::fg_Forward<tf_CData>(_Data));
+			}
+		};
+		
+#		define DMibStreamDeclare(d_Class, d_Stream, d_Direction) extern template void d_Class::f_Stream<NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction>>(NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction> &); 
+#		define DMibStreamImplement(d_Class, d_Stream, d_Direction) template void d_Class::f_Stream<NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction>>(NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction> &);
+
+#		ifndef DMibPNoShortCuts
+#			define DStreamDeclare DMibStreamDeclare
+#			define DStreamImplement DMibStreamImplement
+#		endif
+		
+		namespace NPrivate
+		{
+			struct CDummy
+			{
+			};
+			
+			template <typename t_CStream, typename t_CData, typename t_CEnableIf = void>
+			struct TCHasStream
+			{
+				static constexpr bool mc_Value = false;
+			};
+
+			template <typename t_CStream, typename t_CData >
+			struct TCHasStream
+			<
+				t_CStream
+				, t_CData
+				, TCEnableIfType
+				<
+					!NTraits::TCIsSame
+					<
+						decltype(fg_GetReference<typename NTraits::TCRemoveReferenceAndQualifiers<t_CData>::CType>().f_Stream(fg_GetReference<t_CStream>())), NPrivate::CDummy
+					>::mc_Value
+				>
+			>
+			{
+				static constexpr bool mc_Value = true;
+			};
+		}
+
+		template <typename t_CStream, typename t_CData>
+		class TCBinaryStreamTypeReferenceStream
+		{
+		public:
+			// Stream
+			
+			template 
+			<
+				EStreamDirection t_Direction
+				, typename tf_CData
+				, typename NMib::TCEnableIfType
+				<
+					NPrivate::TCHasStream<TCStreamDirection<t_CStream, t_Direction>, tf_CData>::mc_Value
+				> * = nullptr
+			>
+			inline_small static auto fs_Stream(TCStreamDirection<t_CStream, t_Direction> &_Stream, tf_CData &&_Data)
+			{
+				return fg_Forward<tf_CData>(_Data).f_Stream(_Stream);
+			}
+			
+			template 
+			<
+				typename tf_CData
+				, typename NMib::TCEnableIfType
+				<
+					!NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Feed>, tf_CData>::mc_Value
+				> * = nullptr
+			>
+			inline_small static auto fs_Stream(TCStreamDirection<t_CStream, EStreamDirection_Feed> &_Stream, tf_CData &&_Data) 
+			{
+				static_cast<t_CStream &>(_Stream) << fg_ConstOrMove<tf_CData>(fg_Forward<tf_CData>(_Data));
+			}
+			
+			template 
+			<
+				typename tf_CData
+				, typename NMib::TCEnableIfType
+				<
+					!NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Consume>, tf_CData>::mc_Value
+				> * = nullptr
+			>
+			inline_small static auto fs_Stream(TCStreamDirection<t_CStream, EStreamDirection_Consume> &_Stream, tf_CData &&_Data) 
+			{
+				static_cast<t_CStream &>(_Stream) >> const_cast<typename NTraits::TCRemoveReferenceAndQualifiers<tf_CData>::CType &>(_Data);
+			}
+		};
+		
 		template <typename t_CStream, typename t_CData>
 		class TCBinaryStreamTypeReference
 		{
 		public:
-			template <typename tf_CData, typename NMib::TCDisableIf<NMib::NTraits::TCIsEnum<typename NTraits::TCRemoveReference<tf_CData>::CType>::mc_Value, void>::CType * = nullptr>
+			// Feed
+			
+			template 
+			<
+				typename tf_CData
+				, typename NMib::TCEnableIfType
+				<
+					!NMib::NTraits::TCIsEnum<typename NTraits::TCRemoveReference<tf_CData>::CType>::mc_Value
+					&& !NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Feed>, tf_CData>::mc_Value
+				> * = nullptr
+			>
 			inline_small static auto fs_Feed(t_CStream &_Stream, tf_CData &&_Data)
 			{
 				return fg_Forward<tf_CData>(_Data).f_Feed(_Stream);
 			}
+
+			template 
+			<
+				typename tf_CData
+				, typename NMib::TCEnableIfType
+				<
+					!NMib::NTraits::TCIsEnum<typename NTraits::TCRemoveReference<tf_CData>::CType>::mc_Value
+					&& NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Feed>, tf_CData>::mc_Value
+				> * = nullptr
+			>
+			inline_small static auto fs_Feed(t_CStream &_Stream, tf_CData &&_Data)
+			{
+				return const_cast<typename NTraits::TCRemoveReferenceAndQualifiers<tf_CData>::CType &>(_Data).f_Stream(reinterpret_cast<TCStreamDirection<t_CStream, EStreamDirection_Feed> &>(_Stream));
+			}
 			
-			template <typename tf_CData, typename NMib::TCDisableIf<NMib::NTraits::TCIsEnum<tf_CData>::mc_Value, void>::CType * = nullptr>
-			inline_small static auto fs_Consume(t_CStream &_Stream, tf_CData &_Data)
+			// Consume
+			
+			template 
+			<
+				typename tf_CData
+				, typename NMib::TCEnableIfType
+				<
+					!NMib::NTraits::TCIsEnum<typename NTraits::TCRemoveReference<tf_CData>::CType>::mc_Value
+					&& !NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Consume>, tf_CData>::mc_Value
+				> * = nullptr
+			>
+			inline_small static auto fs_Consume(t_CStream &_Stream, tf_CData &&_Data)
 			{
 				return _Data.f_Consume(_Stream);
 			}
+			
+			template 
+			<
+				typename tf_CData
+				, typename NMib::TCEnableIfType
+				<
+					!NMib::NTraits::TCIsEnum<typename NTraits::TCRemoveReference<tf_CData>::CType>::mc_Value
+					&& NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Consume>, tf_CData>::mc_Value
+				> * = nullptr
+			>
+			inline_small static auto fs_Consume(t_CStream &_Stream, tf_CData &&_Data)
+			{
+				return fg_Forward<tf_CData>(_Data).f_Stream(reinterpret_cast<TCStreamDirection<t_CStream, EStreamDirection_Consume> &>(_Stream));
+			}
 
+			// Enum
+			
 			template <typename tf_CData, typename NMib::TCEnableIf<NMib::NTraits::TCIsEnum<tf_CData>::mc_Value, void>::CType * = nullptr>
 			inline_small static void fs_Feed(t_CStream &_Stream, tf_CData const &_Data)
 			{
@@ -173,12 +357,6 @@ namespace NMib
 			}
 		};
 
-#		define DMibStreamImplementOperators(_Class) \
-			template <typename t_CData>	inline_small auto f_Feed(t_CData &&_Data){return NMib::NStream::TCBinaryStreamTypeReference<_Class, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<t_CData>::CType>::CType>::fs_Feed(*this, NMib::fg_Forward<t_CData>(_Data));} \
-			template <typename t_CData> inline_small auto f_Feed(const t_CData *_pData){return NMib::NStream::TCBinaryStreamTypePtr<_Class, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<t_CData>::CType>::CType>::fs_Feed(*this, _pData);} \
-			template <typename t_CData>	inline_small auto f_Consume(t_CData &&_Data){return NMib::NStream::TCBinaryStreamTypeReference<_Class, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<t_CData>::CType>::CType>::fs_Consume(*this, NMib::fg_Forward<t_CData>(_Data));} \
-			template <typename t_CData> inline_small auto f_Consume(t_CData *_pData){return NMib::NStream::TCBinaryStreamTypePtr<_Class, t_CData>::fs_Consume(*this, _pData);}
-
 		//&& !NTraits::TCIsSame<decltype(NMib::NStream::TCBinaryStreamTypeReference<tf_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Feed(_Stream, NMib::fg_Forward<tf_CData>(_Data))), NPrivate::CDummy>::mc_Value
 
 		
@@ -210,14 +388,6 @@ namespace NMib
 #		endif
 
 		class CScopeBinaryStreamVersion;
-
-		namespace NPrivate
-		{
-			struct CDummy
-			{
-			};
-		}
-		
 		class CBinaryStream
 		{
 			friend class CScopeBinaryStreamVersion;
@@ -441,6 +611,20 @@ namespace NMib
 			>::CType
 		{
 			_Stream.f_Consume(_pData);
+			return _Stream;
+		}
+
+		template <typename tf_CStream, typename tf_CData> 
+		inline_small auto operator % (tf_CStream &_Stream, tf_CData &&_Data)
+		-> typename NMib::TCEnableIf
+			<
+				(NTraits::TCIsBaseOf<tf_CStream, CBinaryStream>::mc_Value || NTraits::TCIsSame<tf_CStream, CBinaryStream>::mc_Value)
+				&& !NMib::NIndirection::TCIsIndirection<typename NTraits::TCRemoveReferenceAndQualifiers<tf_CData>::CType>::mc_Value
+				&& !NTraits::TCIsSame<decltype(_Stream.f_Stream(fg_Forward<tf_CData>(_Data))), NPrivate::CDummy>::mc_Value
+				, tf_CStream &
+			>::CType
+		{
+			_Stream.f_Stream(fg_Forward<tf_CData>(_Data));
 			return _Stream;
 		}
 		
