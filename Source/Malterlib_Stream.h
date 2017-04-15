@@ -78,6 +78,8 @@ namespace NMib
 			{
 				return NMib::NStream::TCBinaryStreamTypeReferenceStream<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Stream(*this, NMib::fg_Forward<tf_CData>(_Data));
 			}
+			
+			static constexpr EStreamDirection mc_Direction = t_Direction;
 		};
 		
 #		define DMibStreamDeclare(d_Class, d_Stream, d_Direction) extern template void d_Class::f_Stream<NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction>>(NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction> &); 
