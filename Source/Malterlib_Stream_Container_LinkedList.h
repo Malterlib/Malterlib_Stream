@@ -1,0 +1,44 @@
+// Copyright © 2015 Hansoft AB 
+// Distributed under the MIT license, see license text in LICENSE.Malterlib
+
+#include <Mib/Container/LinkedList>
+
+namespace NMib
+{
+	namespace NStream
+	{
+		template <typename t_CStream, typename t_CData, typename t_CAllocator>
+		class TCBinaryStreamTypeReference<t_CStream, NContainer::TCLinkedList<t_CData, t_CAllocator> >
+		{
+		public:
+			static void fs_Feed(t_CStream &_Stream, NContainer::TCLinkedList<t_CData, t_CAllocator> const &_Data)
+			{
+				mint nItems = _Data.f_GetLen();
+				
+				fg_FeedLenToStream(_Stream, nItems);
+
+				for (auto iItem = _Data.f_GetIterator(); iItem; ++iItem)
+					_Stream << *iItem;
+			}
+
+			static void fs_Feed(t_CStream &_Stream, NContainer::TCLinkedList<t_CData, t_CAllocator> &&_Data)
+			{
+				mint nItems = _Data.f_GetLen();
+				
+				fg_FeedLenToStream(_Stream, nItems);
+
+				for (auto iItem = _Data.f_GetIterator(); iItem; ++iItem)
+					_Stream << fg_Move(*iItem);
+			}
+	
+			static void fs_Consume(t_CStream &_Stream, NContainer::TCLinkedList<t_CData, t_CAllocator> &_Data)
+			{
+				uint64 nItems;
+				fg_ConsumeLenFromStream(_Stream, nItems);
+
+				for (mint i = 0; i < nItems; ++i)
+					_Stream >> _Data.f_Insert();
+			}
+		};
+	}
+}
