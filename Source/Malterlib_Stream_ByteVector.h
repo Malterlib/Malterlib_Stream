@@ -1,4 +1,4 @@
-﻿// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB 
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #pragma once
@@ -11,18 +11,32 @@ namespace NMib
 	namespace NStream
 	{
 		template <typename tf_CType>
-		NContainer::TCVector<uint8> fg_ToByteVector(const tf_CType &_CreateStreamFrom);
+		NContainer::CByteVector fg_ToByteVector(const tf_CType &_CreateStreamFrom);
 		template <typename tf_CType>
-		tf_CType fg_FromByteVector(const NContainer::TCVector<uint8> &_Data);
+		tf_CType fg_FromByteVector(const NContainer::CByteVector &_Data);
 		template <typename tf_CType>
-		void fg_FromByteVector(const NContainer::TCVector<uint8> &_Data, tf_CType &_Destination);
+		void fg_FromByteVector(const NContainer::CByteVector &_Data, tf_CType &_Destination);
 
 		template <typename tf_CType>
-		NContainer::TCVector<uint8> fg_ToByteVectorBE(const tf_CType &_CreateStreamFrom);
+		NContainer::CByteVector fg_ToByteVectorBE(const tf_CType &_CreateStreamFrom);
 		template <typename tf_CType>
-		tf_CType fg_FromByteVectorBE(const NContainer::TCVector<uint8> &_Data);
+		tf_CType fg_FromByteVectorBE(const NContainer::CByteVector &_Data);
 		template <typename tf_CType>
-		void fg_FromByteVectorBE(const NContainer::TCVector<uint8> &_Data, tf_CType &_Destination);
+		void fg_FromByteVectorBE(const NContainer::CByteVector &_Data, tf_CType &_Destination);
+
+		template <typename tf_CType>
+		NContainer::CSecureByteVector fg_ToSecureByteVector(const tf_CType &_CreateStreamFrom);
+		template <typename tf_CType>
+		tf_CType fg_FromSecureByteVector(const NContainer::CSecureByteVector &_Data);
+		template <typename tf_CType>
+		void fg_FromSecureByteVector(const NContainer::CSecureByteVector &_Data, tf_CType &_Destination);
+
+		template <typename tf_CType>
+		NContainer::CSecureByteVector fg_ToSecureByteVectorBE(const tf_CType &_CreateStreamFrom);
+		template <typename tf_CType>
+		tf_CType fg_FromSecureByteVectorBE(const NContainer::CSecureByteVector &_Data);
+		template <typename tf_CType>
+		void fg_FromSecureByteVectorBE(const NContainer::CSecureByteVector &_Data, tf_CType &_Destination);
 	}
 }
 
