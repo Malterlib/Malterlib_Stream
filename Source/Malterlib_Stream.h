@@ -1436,15 +1436,17 @@ namespace NMib
 
 				while(nItems)
 				{
-					t_CData *pNewItem = new(t_CAllocator::f_Alloc(sizeof(t_CData))) t_CData();
+					auto Memory = t_CAllocator::f_AllocSafe(sizeof(t_CData), NTraits::TCAlignmentOf<t_CData>::mc_Value);
+					t_CData *pNewItem = new(Memory.m_pMemory) t_CData();
+					Memory.f_Claim();
 					auto Cleanup = g_OnScopeExit > [&]
 						{
 							pNewItem->~CNode();
-							t_CAllocator::f_Free(pNewItem);
+							t_CAllocator::f_Free(pNewItem, sizeof(t_CData));
 						}
 					;
-					_Data.f_Insert(pNewItem);
 					_Stream.f_Consume(*pNewItem);
+					_Data.f_Insert(pNewItem);
 					Cleanup.f_Clear();
 					--nItems;
 				}
