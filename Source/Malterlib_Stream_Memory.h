@@ -134,11 +134,41 @@ namespace NMib
 				m_pBuffer = m_Buffer.f_GetArray();
 			}
 
+			CBinaryStreamMemory(CBinaryStreamMemory && _ToMove)
+				: m_Buffer( fg_Move( _ToMove.m_Buffer ) )
+				, m_Position( _ToMove.m_Position )
+				, m_Length( _ToMove.m_Length )
+				, m_BufferSize( _ToMove.m_BufferSize )
+				, m_pBuffer( _ToMove.m_pBuffer )
+			{
+				_ToMove.m_Position = 0;
+				_ToMove.m_Length = 0;
+				_ToMove.m_BufferSize = 0;			
+				_ToMove.m_pBuffer = nullptr;
+			}
+
+			CBinaryStreamMemory& operator=(CBinaryStreamMemory && _ToMove)
+			{
+				m_Buffer = fg_Move( _ToMove.m_Buffer );
+				m_Position = _ToMove.m_Position;
+				m_Length = _ToMove.m_Length;
+				m_BufferSize = _ToMove.m_BufferSize;
+				m_pBuffer = _ToMove.m_pBuffer;
+
+				_ToMove.m_Position = 0;
+				_ToMove.m_Length = 0;
+				_ToMove.m_BufferSize = 0;			
+				_ToMove.m_pBuffer = nullptr;
+
+				return *this;
+			}
+
 			CBinaryStreamMemory()
 			{
 				m_Position = 0;
 				m_Length = 0;
 				m_BufferSize = 0;
+				m_pBuffer = nullptr;
 			}
 
 			void f_Open(CStorage const& _Buffer)
