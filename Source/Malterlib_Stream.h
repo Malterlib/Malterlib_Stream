@@ -102,7 +102,7 @@ namespace NMib
 				static constexpr bool mc_Value = false;
 			};
 
-			template <typename t_CStream, typename t_CData >
+			template <typename t_CStream, typename t_CData>
 			struct TCHasStream
 			<
 				t_CStream
@@ -112,6 +112,76 @@ namespace NMib
 					!NTraits::TCIsSame
 					<
 						decltype(fg_GetReference<typename NTraits::TCRemoveReferenceAndQualifiers<t_CData>::CType>().f_Stream(fg_GetReference<t_CStream>())), NPrivate::CDummy
+					>::mc_Value
+				>
+			>
+			{
+				static constexpr bool mc_Value = true;
+			};
+			
+			template <typename t_CStream, typename t_CData, typename t_CEnableIf = void>
+			struct TCStreamHasStream
+			{
+				static constexpr bool mc_Value = false;
+			};
+
+			template <typename t_CStream, typename t_CData>
+			struct TCStreamHasStream
+			<
+				t_CStream
+				, t_CData
+				, TCEnableIfType
+				<
+					!NTraits::TCIsSame
+					<
+						decltype(fg_GetReference<t_CStream>().f_Stream(fg_GetType<t_CData>())), NPrivate::CDummy
+					>::mc_Value
+				>
+			>
+			{
+				static constexpr bool mc_Value = true;
+			};
+			
+
+			template <typename t_CStream, typename t_CData, typename t_CEnableIf = void>
+			struct TCStreamHasFeed
+			{
+				static constexpr bool mc_Value = false;
+			};
+
+			template <typename t_CStream, typename t_CData >
+			struct TCStreamHasFeed
+			<
+				t_CStream
+				, t_CData
+				, TCEnableIfType
+				<
+					!NTraits::TCIsSame
+					<
+						decltype(fg_GetReference<t_CStream>().f_Feed(fg_GetType<t_CData>())), NPrivate::CDummy
+					>::mc_Value
+				>
+			>
+			{
+				static constexpr bool mc_Value = true;
+			};
+			
+			template <typename t_CStream, typename t_CData, typename t_CEnableIf = void>
+			struct TCStreamHasConsume
+			{
+				static constexpr bool mc_Value = false;
+			};
+
+			template <typename t_CStream, typename t_CData >
+			struct TCStreamHasConsume
+			<
+				t_CStream
+				, t_CData
+				, TCEnableIfType
+				<
+					!NTraits::TCIsSame
+					<
+						decltype(fg_GetReference<t_CStream>().f_Consume(fg_GetType<t_CData>())), NPrivate::CDummy
 					>::mc_Value
 				>
 			>
@@ -568,7 +638,7 @@ namespace NMib
 			<
 				(NTraits::TCIsBaseOf<tf_CStream, CBinaryStream>::mc_Value || NTraits::TCIsSame<tf_CStream, CBinaryStream>::mc_Value)
 				&& !NMib::NIndirection::TCIsIndirection<typename NTraits::TCRemoveReferenceAndQualifiers<tf_CData>::CType>::mc_Value
-				&& !NTraits::TCIsSame<decltype(_Stream.f_Feed(fg_Forward<tf_CData>(_Data))), NPrivate::CDummy>::mc_Value
+				&& NPrivate::TCStreamHasFeed<tf_CStream, tf_CData>::mc_Value
 				, tf_CStream &
 			>::CType
 		{
@@ -582,7 +652,7 @@ namespace NMib
 			<
 				(NTraits::TCIsBaseOf<tf_CStream, CBinaryStream>::mc_Value || NTraits::TCIsSame<tf_CStream, CBinaryStream>::mc_Value)
 				&& !NMib::NIndirection::TCIsIndirection<typename NTraits::TCRemoveReferenceAndQualifiers<tf_CData>::CType>::mc_Value
-				&& !NTraits::TCIsSame<decltype(_Stream.f_Consume(fg_Forward<tf_CData>(_Data))), NPrivate::CDummy>::mc_Value
+				&& NPrivate::TCStreamHasConsume<tf_CStream, tf_CData>::mc_Value
 				, tf_CStream &
 			>::CType
 		{
@@ -591,11 +661,11 @@ namespace NMib
 		}
 	
 		template <typename tf_CStream, typename tf_CData> 
-		inline_small auto operator << (tf_CStream &_Stream, const tf_CData *_pData) 
+		inline_small auto operator << (tf_CStream &_Stream, tf_CData const *_pData) 
 		-> typename NMib::TCEnableIf
 			<
 				(NTraits::TCIsBaseOf<tf_CStream, CBinaryStream>::mc_Value || NTraits::TCIsSame<tf_CStream, CBinaryStream>::mc_Value)
-				&& !NTraits::TCIsSame<decltype(_Stream.f_Feed(_pData)), NPrivate::CDummy>::mc_Value
+				&& NPrivate::TCStreamHasFeed<tf_CStream, tf_CData const *>::mc_Value
 				, tf_CStream &
 			>::CType
 		{
@@ -608,7 +678,7 @@ namespace NMib
 		-> typename NMib::TCEnableIf
 			<
 				(NTraits::TCIsBaseOf<tf_CStream, CBinaryStream>::mc_Value || NTraits::TCIsSame<tf_CStream, CBinaryStream>::mc_Value)
-				&& !NTraits::TCIsSame<decltype(_Stream.f_Consume(_pData)), NPrivate::CDummy>::mc_Value
+				&& NPrivate::TCStreamHasConsume<tf_CStream, tf_CData *>::mc_Value
 				, tf_CStream &
 			>::CType
 		{
@@ -622,7 +692,7 @@ namespace NMib
 			<
 				(NTraits::TCIsBaseOf<tf_CStream, CBinaryStream>::mc_Value || NTraits::TCIsSame<tf_CStream, CBinaryStream>::mc_Value)
 				&& !NMib::NIndirection::TCIsIndirection<typename NTraits::TCRemoveReferenceAndQualifiers<tf_CData>::CType>::mc_Value
-				&& !NTraits::TCIsSame<decltype(_Stream.f_Stream(fg_Forward<tf_CData>(_Data))), NPrivate::CDummy>::mc_Value
+				&& NPrivate::TCStreamHasStream<tf_CStream, tf_CData>::mc_Value
 				, tf_CStream &
 			>::CType
 		{
