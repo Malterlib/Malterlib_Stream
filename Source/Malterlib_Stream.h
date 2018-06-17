@@ -34,7 +34,7 @@ namespace NMib
 		enum EStreamDirection
 		{
 			EStreamDirection_Feed
-			, EStreamDirection_Consume 
+			, EStreamDirection_Consume
 		};	
 
 		template <typename t_CStream, typename t_CData>
@@ -80,6 +80,8 @@ namespace NMib
 			}
 			
 			static constexpr EStreamDirection mc_Direction = t_Direction;
+			static constexpr bool mc_bConsume = mc_Direction == EStreamDirection_Consume;
+			static constexpr bool mc_bFeed = mc_Direction == EStreamDirection_Feed;
 		};
 		
 #		define DMibStreamDeclare(d_Class, d_Stream, d_Direction) extern template void d_Class::f_Stream<NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction>>(NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction> &); 
