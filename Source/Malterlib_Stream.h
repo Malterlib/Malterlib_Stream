@@ -450,6 +450,7 @@ namespace NMib
 			void fp_SetLength(NMib::NStream::CFilePos _Length) {return _Class::f_SetLength(_Length);}\
 			aint fp_LengthSize() const {aint Ret = 0; Ret = _Class::f_LengthSize(); return Ret;}\
 			aint fp_Endian() const {aint Ret = 0; Ret = _Class::f_Endian(); return Ret;}\
+			mint fp_ContainerLengthLimit() const {mint Ret = 0; Ret = _Class::f_ContainerLengthLimit(); return Ret;}\
 			void fp_FeedFromStream(NMib::NStream::CBinaryStream &_Stream, NMib::NStream::CFilePos _nBytes){_Class::f_FeedFromStream(_Stream, _nBytes);}\
 
 #		if defined(DMibDebug) && 0
@@ -462,30 +463,23 @@ namespace NMib
 #		endif
 
 		class CScopeBinaryStreamVersion;
+		class CScopeBinaryStreamContext;
+		class CScopeBinaryStreamContainerLengthLimit;
+
 		class CBinaryStream
 		{
 			friend class CScopeBinaryStreamVersion;
 			friend class CScopeBinaryStreamContext;
+			friend class CScopeBinaryStreamContainerLengthLimit;
 		public:
-			class CVersionEntry
-			{
-			public:
-				DMibListLinkS_Link(CVersionEntry, m_Link);
-				uint32 m_Version;
-			};
-			class CContextEntry
-			{
-			public:
-				DMibListLinkS_Link(CContextEntry, m_Link);
-				void *m_pContext;
-			};
 			CBinaryStream()
 			{
 			}
 		private:
 
-			DMibListLinkS_ListNoLastPtr(CVersionEntry, m_Link) m_VersionStack;
-			DMibListLinkS_ListNoLastPtr(CContextEntry, m_Link) m_ContextStack;
+			void *m_pContext = nullptr;
+			mint m_ContainerLengthLimit = 0;
+			uint32 m_Version = 0;
 
 			DMibClassNoCopyAllowed(CBinaryStream);
 
@@ -505,6 +499,7 @@ namespace NMib
 			virtual void fp_SetLength(CFilePos _Length) = 0;
 			virtual	aint fp_LengthSize() const = 0;
 			virtual aint fp_Endian() const = 0;
+			virtual mint fp_ContainerLengthLimit() const = 0;
 			virtual void fp_FeedFromStream(CBinaryStream &_Stream, CFilePos _nBytes) = 0;
 
 			inline_never void fp_ThrowEndOfStreamException()
@@ -531,6 +526,7 @@ namespace NMib
 			DMibTempStreamPre void f_SetLength(CFilePos _Length) DMibTempStreamPost;
 			DMibTempStreamPre aint f_LengthSize() const DMibTempStreamPost;
 			DMibTempStreamPre aint f_Endian() const DMibTempStreamPost;
+			DMibTempStreamPre mint f_ContainerLengthLimit() const DMibTempStreamPost;
 			DMibTempStreamPre void f_FeedFromStream(CBinaryStream &_Stream, CFilePos _nBytes) DMibTempStreamPost;
 #else
 			DMibTempStreamPre void f_FeedBytes(const void *_pMem, mint _nBytes) DMibTempStreamPost
@@ -607,29 +603,32 @@ namespace NMib
 				return fp_Endian();
 			}
 
+			DMibTempStreamPre mint f_ContainerLengthLimit() const DMibTempStreamPost
+			{
+				return fp_ContainerLengthLimit();
+			}
+
 			DMibTempStreamPre void f_FeedFromStream(CBinaryStream &_Stream, CFilePos _nBytes) DMibTempStreamPost
 			{
 				fp_FeedFromStream(_Stream, _nBytes);
 			}
 
 #endif
-			inline_small uint32 f_GetVersion()
+			inline_small uint32 f_GetVersion() const
 			{
-				CVersionEntry *pVersion = m_VersionStack.f_GetFirst();
-				if (pVersion)
-					return pVersion->m_Version;
-				else
-					DMibError("No version specified for stream.");
+				return m_Version;
 			}
-			inline_small void *f_GetContext()
+			inline_small void *f_GetContext() const
 			{
-				CContextEntry *pContext = m_ContextStack.f_GetFirst();
-				if (pContext)
-					return pContext->m_pContext;
-				else
-					return nullptr;
+				return m_pContext;
 			}
 
+			inline_small mint f_ClaimContainerLengthLimitOverride()
+			{
+				mint Return = m_ContainerLengthLimit;
+				m_ContainerLengthLimit = 0;
+				return Return;
+			}
 
 			DMibStreamImplementOperators(CBinaryStream);
 		};
@@ -726,33 +725,25 @@ namespace NMib
 			_Stream.f_SetPosition(EndPosition);
 		}
 
-		class CScopeBinaryStreamVersion : CBinaryStream::CVersionEntry
+		class CScopeBinaryStreamVersion
 		{
-		private:
-			CScopeBinaryStreamVersion(const CScopeBinaryStreamVersion &_Other) : m_pStream(_Other.m_pStream)
-			{
-			}
-			CScopeBinaryStreamVersion &operator = (const CScopeBinaryStreamVersion &_Other)
-			{
-				return *this;
-			}
 		public:
-			CBinaryStream *m_pStream;
-			CScopeBinaryStreamVersion() : 
-			m_pStream(0)
+			CScopeBinaryStreamVersion() = delete;
+			CScopeBinaryStreamVersion(const CScopeBinaryStreamVersion &_Other) = delete;
+			CScopeBinaryStreamVersion & operator = (CScopeBinaryStreamVersion const &) = delete;
+
+			CScopeBinaryStreamVersion(CBinaryStream &_Stream, uint32 _Version)
+				: mp_pStream(&_Stream)
 			{
-			}
-			CScopeBinaryStreamVersion(CBinaryStream &_Stream, uint32 _Version) : 
-			m_pStream(&_Stream)				
-			{
-				m_Version = _Version;
-				m_pStream->m_VersionStack.f_Push(this);
+				mp_OldVersion = _Stream.m_Version;
+				_Stream.m_Version = _Version;
 			}
 			void f_SetVersion(CBinaryStream &_Stream, uint32 _Version)
 			{
 				f_Clear();
-				m_pStream = &_Stream;
-				m_Version = _Version;
+				mp_pStream = &_Stream;
+				mp_OldVersion = _Stream.m_Version;
+				_Stream.m_Version = _Version;
 			}
 			~CScopeBinaryStreamVersion()
 			{
@@ -760,65 +751,97 @@ namespace NMib
 			}
 			void f_Clear()
 			{
-				if (m_pStream)
+				if (mp_pStream)
 				{
-#					if DMibEnableSafeCheck > 0
-						CBinaryStream::CVersionEntry *pEntry = m_pStream->m_VersionStack.f_Pop();
-						DMibSafeCheck(pEntry == this, "Must be");
-#					else
-						m_pStream->m_VersionStack.f_Pop();
-#					endif
+					mp_pStream->m_Version = mp_OldVersion;
+					mp_pStream = nullptr;
 				}
-				m_pStream = nullptr;
 			}
+
+		private:
+			CBinaryStream *mp_pStream;
+			uint32 mp_OldVersion;
 		};
 
 #		define DMibBinaryStreamVersion(_Stream, _Version) NMib::NStream::CScopeBinaryStreamVersion ScopeBinaryStreamVersion(_Stream, _Version)
 
 #		ifndef DMibPNoShortCuts
 #			define DBinaryStreamVersion(_Stream, _Version) DMibBinaryStreamVersion(_Stream, _Version)
-#		endif // DMibPNoShortCuts
+#		endif
 
 
-		class CScopeBinaryStreamContext : CBinaryStream::CContextEntry
+		class CScopeBinaryStreamContainerLengthLimit
 		{
-		private:
-			CScopeBinaryStreamContext(const CScopeBinaryStreamContext &_Other) : m_pStream(_Other.m_pStream)
-			{
-			}
-			CScopeBinaryStreamContext &operator = (const CScopeBinaryStreamContext &_Other)
-			{
-				return *this;
-			}
 		public:
-			CBinaryStream *m_pStream;
-			CScopeBinaryStreamContext():
-			m_pStream(0)
+			CScopeBinaryStreamContainerLengthLimit() = delete;
+			CScopeBinaryStreamContainerLengthLimit(const CScopeBinaryStreamContainerLengthLimit &_Other) = delete;
+			CScopeBinaryStreamContainerLengthLimit & operator = (CScopeBinaryStreamContainerLengthLimit const &) = delete;
+
+			CScopeBinaryStreamContainerLengthLimit(CBinaryStream &_Stream, uint32 _ContainerLengthLimit)
+				: mp_pStream(&_Stream)
 			{
+				mp_OldContainerLengthLimit = _Stream.m_ContainerLengthLimit;
+				_Stream.m_ContainerLengthLimit = _ContainerLengthLimit;
 			}
-			CScopeBinaryStreamContext(CBinaryStream &_Stream, void *_pContext) : 
-			m_pStream(&_Stream)
+			void f_SetContainerLengthLimit(CBinaryStream &_Stream, uint32 _ContainerLengthLimit)
 			{
-				m_pContext = _pContext;
-				m_pStream->m_ContextStack.f_Push(this);
+				f_Clear();
+				mp_pStream = &_Stream;
+				mp_OldContainerLengthLimit = _Stream.m_ContainerLengthLimit;
+				_Stream.m_ContainerLengthLimit = _ContainerLengthLimit;
 			}
+			~CScopeBinaryStreamContainerLengthLimit()
+			{
+				f_Clear();
+			}
+			void f_Clear()
+			{
+				if (mp_pStream)
+				{
+					mp_pStream->m_ContainerLengthLimit = mp_OldContainerLengthLimit;
+					mp_pStream = nullptr;
+				}
+			}
+
+		private:
+			CBinaryStream *mp_pStream;
+			uint32 mp_OldContainerLengthLimit;
+		};
+
+#		define DMibBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit) NMib::NStream::CScopeBinaryStreamContainerLengthLimit ScopeBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit)
+
+#		ifndef DMibPNoShortCuts
+#			define DBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit) DMibBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit)
+#		endif
+
+
+		class CScopeBinaryStreamContext
+		{
+		public:
+			CScopeBinaryStreamContext(const CScopeBinaryStreamContext &_Other) = delete;
+			CScopeBinaryStreamContext &operator = (const CScopeBinaryStreamContext &_Other) = delete;
+			CScopeBinaryStreamContext() = delete;
+
+			CScopeBinaryStreamContext(CBinaryStream &_Stream, void *_pContext)
+				: m_pStream(&_Stream)
+			{
+				m_pOldContext = _Stream.m_pContext;
+				_Stream.m_pContext = _pContext;
+			}
+
 			void f_SetContext(CBinaryStream &_Stream, void *_pContext)
 			{
 				f_Clear();
 				m_pStream = &_Stream;
-				m_pContext = _pContext;
-				m_pStream->m_ContextStack.f_Push(this);
+				m_pOldContext = _Stream.m_pContext;
+				_Stream.m_pContext = _pContext;
 			}
+
 			void f_Clear()
 			{
 				if (m_pStream)
 				{
-#					if DMibEnableSafeCheck > 0
-						CBinaryStream::CContextEntry *pEntry = m_pStream->m_ContextStack.f_Pop();
-						DMibSafeCheck(pEntry == this, "Must be");
-#					else
-						m_pStream->m_ContextStack.f_Pop();
-#					endif
+					m_pStream->m_pContext = m_pOldContext;
 					m_pStream = nullptr;
 				}
 			}
@@ -826,13 +849,16 @@ namespace NMib
 			{
 				f_Clear();
 			}
+		private:
+			CBinaryStream *m_pStream;
+			void *m_pOldContext;
 		};
 
 #		define DMibBinaryStreamContext(_Stream, _Context) NMib::NStream::CScopeBinaryStreamContext ScopeBinaryStreamContext(_Stream, _Context)
 
 #		ifndef DMibPNoShortCuts
 #			define DBinaryStreamContext(_Stream, _Context) DMibBinaryStreamContext(_Stream, _Context)
-#		endif // DMibPNoShortCuts
+#		endif
 
 #undef DMibTempStreamDebug
 #undef DMibTempStreamPre
@@ -859,6 +885,11 @@ namespace NMib
 			inline_small aint f_Endian() const
 			{
 				return EEndian_Little;
+			}
+
+			mint f_ContainerLengthLimit() const
+			{
+				return 1 * 1024 * 1024; // This is for streams that don't have a length
 			}
 
 			void f_FeedFromStream(CBinaryStream &_Stream, CFilePos _nBytes)
@@ -1048,7 +1079,13 @@ namespace NMib
 			{
                 return m_Length;
 			}
-			void f_SetLength(NStream::CFilePos _Length) 
+
+			mint f_ContainerLengthLimit() const
+			{
+				return f_GetLength() - f_GetPosition();
+			}
+
+			void f_SetLength(NStream::CFilePos _Length)
 			{ 
 				m_Length = _Length;
 			}
@@ -1067,6 +1104,27 @@ namespace NMib
 			case 8:	_Stream << (uint64)_Len; break;				
 			default: DMibSafeCheck(0, "Unsupported save size"); break;
 			}
+		}
+
+		inline_always mint fg_CapLengthLimit(NStream::CFilePos const &_Len)
+		{
+			if constexpr (sizeof(mint) < sizeof(NStream::CFilePos))
+			{
+				if (_Len > NStream::CFilePos{TCLimitsInt<smint>::mc_Max})
+					return TCLimitsInt<smint>::mc_Max;
+			}
+			return _Len;
+		}
+
+		template <typename tf_CStream, typename tf_CLen>
+		void fg_CheckLengthLimit(tf_CStream &_Stream, tf_CLen const &_Len)
+		{
+			mint LengthLimit = _Stream.f_ClaimContainerLengthLimitOverride();
+			if (!LengthLimit)
+				LengthLimit = _Stream.f_ContainerLengthLimit();
+
+			if (_Len > uint64(LengthLimit))
+				DMibErrorStream("Container length would cause stream to overrun");
 		}
 
 		template <typename t_CStream>
@@ -1130,6 +1188,7 @@ namespace NMib
 				fg_ConsumeLenFromStream(_Stream, Len);
 				NStr::EStrType Type = NStr::EStrType_Ansi;
 				fg_StrDecodeLenType(Len, _Stream.f_LengthSize(), Type);
+				fg_CheckLengthLimit(_Stream, Len);
 				_Stream.f_ConsumeBytes(_pData, Len);
 				_pData[Len] = 0;
 			}
@@ -1153,6 +1212,7 @@ namespace NMib
 				fg_ConsumeLenFromStream(_Stream, Len);
 				NStr::EStrType Type = NStr::EStrType_Ansi;
 				fg_StrDecodeLenType(Len, _Stream.f_LengthSize(), Type);
+				fg_CheckLengthLimit(_Stream, Len);
 				_Stream.f_ConsumeBytes(_pData, Len);
 				fg_ByteSwapArray(_Stream, _pData, Len, _Stream.f_Endian());
 				_pData[Len] = 0;
@@ -1177,6 +1237,7 @@ namespace NMib
 				fg_ConsumeLenFromStream(_Stream, Len);
 				NStr::EStrType Type = NStr::EStrType_Ansi;
 				fg_StrDecodeLenType(Len, _Stream.f_LengthSize(), Type);
+				fg_CheckLengthLimit(_Stream, Len);
 				_Stream.f_ConsumeBytes(_pData, Len);
 				fg_ByteSwapArray(_Stream, _pData, Len, _Stream.f_Endian());
 				_pData[Len] = 0;
@@ -1505,6 +1566,7 @@ namespace NMib
 			{
 				uint64 nItems;
 				fg_ConsumeLenFromStream(_Stream, nItems);
+				fg_CheckLengthLimit(_Stream, nItems);
 
 				while(nItems)
 				{

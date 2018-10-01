@@ -1,4 +1,4 @@
-﻿// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB 
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include <Mib/Core/Core>
@@ -284,7 +284,13 @@ namespace NMib
 			{
                 return m_Length;
 			}
-			void f_SetLength(NStream::CFilePos _Length) 
+
+			mint f_ContainerLengthLimit() const
+			{
+				return f_GetLength() - f_GetPosition();
+			}
+
+			void f_SetLength(NStream::CFilePos _Length)
 			{ 
 				if (_Length > NStream::CFilePos(m_Length))
 				{
@@ -493,6 +499,12 @@ namespace NMib
 			{
                 return m_Length;
 			}
+
+			mint f_ContainerLengthLimit() const
+			{
+				return f_GetLength() - f_GetPosition();
+			}
+
 			void f_SetLength(NStream::CFilePos _Length) 
 			{ 
 				if (_Length > NStream::CFilePos(m_Length))
@@ -645,7 +657,13 @@ namespace NMib
 			{
                 return m_Length;
 			}
-			void f_SetLength(NStream::CFilePos _Length) 
+
+			mint f_ContainerLengthLimit() const
+			{
+				return f_GetLength() - f_GetPosition();
+			}
+
+			void f_SetLength(NStream::CFilePos _Length)
 			{ 
 				DMibError("Const stream cannot change length");
 			}
@@ -784,6 +802,11 @@ namespace NMib
 			CFilePos f_GetLength() const
 			{
                 return m_Length;
+			}
+
+			mint f_ContainerLengthLimit() const
+			{
+				return f_GetLength() - f_GetPosition();
 			}
 
 			void f_SetLength(NStream::CFilePos _Length) 
@@ -936,6 +959,11 @@ namespace NMib
 			CFilePos f_GetLength() const
 			{
                 return m_Length;
+			}
+
+			mint f_ContainerLengthLimit() const
+			{
+				return f_GetLength() - f_GetPosition();
 			}
 
 			void f_SetLength(NStream::CFilePos _Length) 
@@ -1120,6 +1148,11 @@ namespace NMib
 					return m_pSubStream->f_GetLength() - m_SubPos;
 			}
 
+			mint f_ContainerLengthLimit() const
+			{
+				return NStream::fg_CapLengthLimit(f_GetLength() - f_GetPosition());
+			}
+
 			void f_SetLength(NStream::CFilePos _Length) 
 			{ 
 				return m_pSubStream->f_SetLength(m_SubPos + _Length);
@@ -1248,6 +1281,11 @@ namespace NMib
 			CFilePos f_GetLength() const
 			{
 				return m_pWriteToStream->f_GetLength();
+			}
+
+			mint f_ContainerLengthLimit() const
+			{
+				return m_pWriteToStream->f_ContainerLengthLimit();
 			}
 
 			void f_SetLength(NStream::CFilePos _Length) 

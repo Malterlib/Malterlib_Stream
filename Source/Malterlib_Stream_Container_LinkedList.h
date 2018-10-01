@@ -35,6 +35,7 @@ namespace NMib
 			{
 				uint64 nItems;
 				fg_ConsumeLenFromStream(_Stream, nItems);
+				fg_CheckLengthLimit(_Stream, nItems);
 
 				for (mint i = 0; i < nItems; ++i)
 					_Stream >> _Data.f_Insert();
