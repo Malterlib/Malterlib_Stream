@@ -12,7 +12,8 @@ namespace NMib
 		class CBinaryStreamMemory : public t_CStreamType
 		{
 		private:
-			DMibClassNoCopyAllowed(CBinaryStreamMemory);
+			CBinaryStreamMemory(CBinaryStreamMemory const &) = delete;
+			CBinaryStreamMemory &operator = (CBinaryStreamMemory const &) = delete;
 
 		public:
 			typedef t_CVector CStorage;
@@ -305,7 +306,8 @@ namespace NMib
 		class CBinaryStreamMemoryRef : public t_CStreamType
 		{
 		private:
-			DMibClassNoCopyAllowed(CBinaryStreamMemoryRef);
+			CBinaryStreamMemoryRef(CBinaryStreamMemoryRef const &) = delete;
+			CBinaryStreamMemoryRef &operator = (CBinaryStreamMemoryRef const &) = delete;
 
 		public:
 			typedef t_CVector CStorage;
@@ -527,7 +529,8 @@ namespace NMib
 		class CBinaryStreamMemoryConstRef : public t_CStreamType
 		{
 		private:
-			DMibClassNoCopyAllowed(CBinaryStreamMemoryConstRef);
+			CBinaryStreamMemoryConstRef(CBinaryStreamMemoryConstRef const &) = delete;
+			CBinaryStreamMemoryConstRef &operator = (CBinaryStreamMemoryConstRef const &) = delete;
 
 		public:
 			typedef t_CVector CStorage;
@@ -680,7 +683,8 @@ namespace NMib
 		class CBinaryStreamMemoryPtr : public t_CStreamType
 		{
 		private:
-			DMibClassNoCopyAllowed(CBinaryStreamMemoryPtr);
+			CBinaryStreamMemoryPtr(CBinaryStreamMemoryPtr const &) = delete;
+			CBinaryStreamMemoryPtr &operator = (CBinaryStreamMemoryPtr const &) = delete;
 
 		protected:
 			mint m_Position;
@@ -839,7 +843,8 @@ namespace NMib
 		class CBinaryStreamConstMemoryPtr : public t_CStreamType
 		{
 		private:
-			DMibClassNoCopyAllowed(CBinaryStreamConstMemoryPtr);
+			CBinaryStreamConstMemoryPtr(CBinaryStreamConstMemoryPtr const &) = delete;
+			CBinaryStreamConstMemoryPtr &operator = (CBinaryStreamConstMemoryPtr const &) = delete;
 
 		protected:
 			mint m_Position;

@@ -481,7 +481,8 @@ namespace NMib
 			mint m_ContainerLengthLimit = 0;
 			uint32 m_Version = 0;
 
-			DMibClassNoCopyAllowed(CBinaryStream);
+			CBinaryStream(CBinaryStream const &) = delete;
+			CBinaryStream &operator = (CBinaryStream const &) = delete;
 
 		protected:
 			virtual void fp_FeedBytes(const void *_pMem, mint _nBytes) = 0;
@@ -867,7 +868,9 @@ namespace NMib
 		class CBinaryStreamDefault : public CBinaryStream
 		{
 		private:
-			DMibClassNoCopyAllowed(CBinaryStreamDefault);
+			CBinaryStreamDefault(CBinaryStreamDefault const &) = delete;
+			CBinaryStreamDefault &operator = (CBinaryStreamDefault const &) = delete;
+
 		protected:
 			DMibStreamImplementProtected(CBinaryStreamDefault);
 		public:
@@ -910,7 +913,9 @@ namespace NMib
 		class CBinaryStreamDefaultRef : public CBinaryStreamDefault, public NPtr::TCSharedPointerIntrusiveBase<>
 		{
 		private:
-			DMibClassNoCopyAllowed(CBinaryStreamDefaultRef);
+			CBinaryStreamDefaultRef(CBinaryStreamDefaultRef const &) = delete;
+			CBinaryStreamDefaultRef &operator = (CBinaryStreamDefaultRef const &) = delete;
+
 		protected:
 			DMibStreamImplementProtected(CBinaryStreamDefaultRef);
 		public:
@@ -925,7 +930,9 @@ namespace NMib
 		class CBinaryStreamBigEndian : public CBinaryStreamDefault
 		{
 		private:
-			DMibClassNoCopyAllowed(CBinaryStreamBigEndian);
+			CBinaryStreamBigEndian(CBinaryStreamBigEndian const &) = delete;
+			CBinaryStreamBigEndian &operator = (CBinaryStreamBigEndian const &) = delete;
+
 		protected:
 			DMibStreamImplementProtected(CBinaryStreamBigEndian);
 		public:
@@ -944,7 +951,9 @@ namespace NMib
 		class CBinaryStreamLittleEndian : public CBinaryStreamDefault
 		{
 		private:
-			DMibClassNoCopyAllowed(CBinaryStreamLittleEndian);
+			CBinaryStreamLittleEndian(CBinaryStreamLittleEndian const &) = delete;
+			CBinaryStreamLittleEndian &operator = (CBinaryStreamLittleEndian const &) = delete;
+
 		protected:
 
 			DMibStreamImplementProtected(CBinaryStreamLittleEndian);
@@ -964,7 +973,9 @@ namespace NMib
 		class CBinaryStreamNativeEndian : public CBinaryStreamDefault
 		{
 		private:
-			DMibClassNoCopyAllowed(CBinaryStreamNativeEndian);
+			CBinaryStreamNativeEndian(CBinaryStreamNativeEndian const &) = delete;
+			CBinaryStreamNativeEndian &operator = (CBinaryStreamNativeEndian const &) = delete;
+
 		protected:
 
 			DMibStreamImplementProtected(CBinaryStreamNativeEndian);
@@ -985,7 +996,9 @@ namespace NMib
 		class TCBinaryStreamNull : public t_CStreamType
 		{
 		private:
-			DMibClassNoCopyAllowed(TCBinaryStreamNull);
+			TCBinaryStreamNull(TCBinaryStreamNull const &) = delete;
+			TCBinaryStreamNull &operator = (TCBinaryStreamNull const &) = delete;
+			
 		protected:
 			mint m_Position;
 			mint m_Length;
