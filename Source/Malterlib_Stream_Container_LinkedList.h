@@ -3,43 +3,40 @@
 
 #include <Mib/Container/LinkedList>
 
-namespace NMib
+namespace NMib::NStream
 {
-	namespace NStream
+	template <typename t_CStream, typename t_CData, typename t_CAllocator>
+	class TCBinaryStreamTypeReference<t_CStream, NContainer::TCLinkedList<t_CData, t_CAllocator> >
 	{
-		template <typename t_CStream, typename t_CData, typename t_CAllocator>
-		class TCBinaryStreamTypeReference<t_CStream, NContainer::TCLinkedList<t_CData, t_CAllocator> >
+	public:
+		static void fs_Feed(t_CStream &_Stream, NContainer::TCLinkedList<t_CData, t_CAllocator> const &_Data)
 		{
-		public:
-			static void fs_Feed(t_CStream &_Stream, NContainer::TCLinkedList<t_CData, t_CAllocator> const &_Data)
-			{
-				mint nItems = _Data.f_GetLen();
-				
-				fg_FeedLenToStream(_Stream, nItems);
+			mint nItems = _Data.f_GetLen();
 
-				for (auto iItem = _Data.f_GetIterator(); iItem; ++iItem)
-					_Stream << *iItem;
-			}
+			fg_FeedLenToStream(_Stream, nItems);
 
-			static void fs_Feed(t_CStream &_Stream, NContainer::TCLinkedList<t_CData, t_CAllocator> &&_Data)
-			{
-				mint nItems = _Data.f_GetLen();
-				
-				fg_FeedLenToStream(_Stream, nItems);
+			for (auto iItem = _Data.f_GetIterator(); iItem; ++iItem)
+				_Stream << *iItem;
+		}
 
-				for (auto iItem = _Data.f_GetIterator(); iItem; ++iItem)
-					_Stream << fg_Move(*iItem);
-			}
-	
-			static void fs_Consume(t_CStream &_Stream, NContainer::TCLinkedList<t_CData, t_CAllocator> &_Data)
-			{
-				uint64 nItems;
-				fg_ConsumeLenFromStream(_Stream, nItems);
-				fg_CheckLengthLimit(_Stream, nItems);
+		static void fs_Feed(t_CStream &_Stream, NContainer::TCLinkedList<t_CData, t_CAllocator> &&_Data)
+		{
+			mint nItems = _Data.f_GetLen();
 
-				for (mint i = 0; i < nItems; ++i)
-					_Stream >> _Data.f_Insert();
-			}
-		};
-	}
+			fg_FeedLenToStream(_Stream, nItems);
+
+			for (auto iItem = _Data.f_GetIterator(); iItem; ++iItem)
+				_Stream << fg_Move(*iItem);
+		}
+
+		static void fs_Consume(t_CStream &_Stream, NContainer::TCLinkedList<t_CData, t_CAllocator> &_Data)
+		{
+			uint64 nItems;
+			fg_ConsumeLenFromStream(_Stream, nItems);
+			fg_CheckLengthLimit(_Stream, nItems);
+
+			for (mint i = 0; i < nItems; ++i)
+				_Stream >> _Data.f_Insert();
+		}
+	};
 }

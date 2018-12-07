@@ -1,4 +1,4 @@
-﻿// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB 
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include <Mib/Container/RegistryMixed>
@@ -11,7 +11,7 @@ namespace
 		ETesting_1,
 	};
 
-	using namespace NMib::NRegistry;
+	using namespace NMib::NContainer;
 	using namespace NMib::NStream;
 	using namespace NMib::NContainer;
 	using namespace NMib::NStr;
@@ -121,13 +121,13 @@ namespace
 
 			DMibTestCategory("Named Stream")
 			{
-				NMib::NRegistry::CRegistry_CMStrDeprecated TestRegSource;
+				NMib::NContainer::CRegistry_CMStrDeprecated TestRegSource;
 				TestRegSource.f_SetValue("Testing123", "TestVal123");
 				TestRegSource.f_SetValue("Testing321", "TestVal321");
 
 				DMibTestSuite("Registry")
 				{
-					NMib::NRegistry::CRegistry_CStr Reg;
+					NMib::NContainer::CRegistry_CStr Reg;
 
 					{
 						int32 Test = 334;
@@ -148,11 +148,11 @@ namespace
 						DMibTest(DMibExpr(TestEnum) == DMibExpr(ETesting_1));
 
 
-						NMib::NRegistry::CRegistry_CMStrDeprecated TestReg;
-						Reg >> fg_Named("TestReg", TestReg, NMib::NRegistry::CRegistry_CMStrDeprecated());
+						NMib::NContainer::CRegistry_CMStrDeprecated TestReg;
+						Reg >> fg_Named("TestReg", TestReg, NMib::NContainer::CRegistry_CMStrDeprecated());
 						DMibTest(DMibExpr(TestReg == TestRegSource));
 
-						Reg >> fg_Named("TestRegNotFound", TestReg, NMib::NRegistry::CRegistry_CMStrDeprecated());
+						Reg >> fg_Named("TestRegNotFound", TestReg, NMib::NContainer::CRegistry_CMStrDeprecated());
 						DMibTest(DMibExpr(TestReg != TestRegSource));
 
 						int32 Test3;
@@ -181,8 +181,8 @@ namespace
 						Stream >> fg_Named("TestEnum", TestEnum, ETesting_0);
 						DMibTest(DMibExpr(TestEnum) == DMibExpr(ETesting_1));
 
-						NMib::NRegistry::CRegistry_CMStrDeprecated TestReg;
-						Stream >> fg_Named("TestReg", TestReg, NMib::NRegistry::CRegistry_CMStrDeprecated());
+						NMib::NContainer::CRegistry_CMStrDeprecated TestReg;
+						Stream >> fg_Named("TestReg", TestReg, NMib::NContainer::CRegistry_CMStrDeprecated());
 						DMibTest(DMibExpr(TestReg == TestRegSource));
 
 						int32 Test3;
