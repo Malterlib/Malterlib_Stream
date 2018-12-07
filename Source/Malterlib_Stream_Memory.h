@@ -409,7 +409,13 @@ namespace NMib
 
 			~CBinaryStreamMemoryRef()
 			{
-				m_Buffer.f_SetLen(m_Length, false);
+				try
+				{
+					m_Buffer.f_SetLen(m_Length, false);
+				}
+				catch (...)
+				{
+				}
 			}
 
 			void f_ResetStream()
