@@ -11,8 +11,8 @@
 
 namespace NMib::NStream
 {
-	DMibImpErrorClass(CExceptionStream, NMib::NException::CException);
-	DMibImpErrorClass(CExceptionStreamVersionMismatch, CExceptionStream);
+	DMibImpErrorClassDefine(CExceptionStream, NMib::NException::CException);
+	DMibImpErrorClassDefine(CExceptionStreamVersionMismatch, CExceptionStream);
 
 #	define DMibErrorStream(_Description) DMibImpError(NMib::NStream::CExceptionStream, _Description)
 
