@@ -4,8 +4,6 @@
 #pragma once
 
 #include <Mib/Core/Core>
-//#include <boost/type_traits.hpp>
-#include <Mib/Storage/Indirection>
 
 #define DMibIncluded_Stream
 
@@ -636,7 +634,6 @@ namespace NMib::NStream
 	-> typename NMib::TCEnableIf
 		<
 			(NTraits::TCIsBaseOf<tf_CStream, CBinaryStream>::mc_Value || NTraits::TCIsSame<tf_CStream, CBinaryStream>::mc_Value)
-			&& !NMib::NStorage::TCIsIndirection<typename NTraits::TCRemoveReferenceAndQualifiers<tf_CData>::CType>::mc_Value
 			&& NPrivate::TCStreamHasFeed<tf_CStream, tf_CData>::mc_Value
 			, tf_CStream &
 		>::CType
@@ -650,7 +647,6 @@ namespace NMib::NStream
 	-> typename NMib::TCEnableIf
 		<
 			(NTraits::TCIsBaseOf<tf_CStream, CBinaryStream>::mc_Value || NTraits::TCIsSame<tf_CStream, CBinaryStream>::mc_Value)
-			&& !NMib::NStorage::TCIsIndirection<typename NTraits::TCRemoveReferenceAndQualifiers<tf_CData>::CType>::mc_Value
 			&& NPrivate::TCStreamHasConsume<tf_CStream, tf_CData>::mc_Value
 			, tf_CStream &
 		>::CType
@@ -690,7 +686,6 @@ namespace NMib::NStream
 	-> typename NMib::TCEnableIf
 		<
 			(NTraits::TCIsBaseOf<tf_CStream, CBinaryStream>::mc_Value || NTraits::TCIsSame<tf_CStream, CBinaryStream>::mc_Value)
-			&& !NMib::NStorage::TCIsIndirection<typename NTraits::TCRemoveReferenceAndQualifiers<tf_CData>::CType>::mc_Value
 			&& NPrivate::TCStreamHasStream<tf_CStream, tf_CData>::mc_Value
 			, tf_CStream &
 		>::CType
@@ -1614,27 +1609,6 @@ namespace NMib::NStream
 		static void fs_Consume(t_CStream &_Stream, NIntrusive::TCDLinkList<t_CData, t_CTranslator, t_CLink, t_CLinkInList, t_bAutoDelete, t_CAllocator> &_Data)
 		{
 			_Stream >> (NIntrusive::TCDLinkListAggregate<t_CData, t_CTranslator, t_CLink, t_CLinkInList, t_bAutoDelete, t_CAllocator> &)_Data;
-		}
-	};
-
-
-	template <typename t_CStream, typename t_CType, typename t_CAllocator, typename t_CPtr>
-	class TCBinaryStreamTypeReference<t_CStream, NStorage::TCIndirection<t_CType, t_CAllocator, t_CPtr>>
-	{
-	public:
-		static void fs_Feed(t_CStream &_Stream, NStorage::TCIndirection<t_CType, t_CAllocator, t_CPtr> const &_Data)
-		{
-			_Stream << _Data.f_Get();
-		}
-
-		static void fs_Feed(t_CStream &_Stream, NStorage::TCIndirection<t_CType, t_CAllocator, t_CPtr> &&_Data)
-		{
-			_Stream << fg_Move(_Data.f_Get());
-		}
-
-		static void fs_Consume(t_CStream &_Stream, NStorage::TCIndirection<t_CType, t_CAllocator, t_CPtr> &_Data)
-		{
-			_Stream >> _Data.f_Get();
 		}
 	};
 }
