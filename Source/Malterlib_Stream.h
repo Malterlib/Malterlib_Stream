@@ -1611,6 +1611,67 @@ namespace NMib::NStream
 			_Stream >> (NIntrusive::TCDLinkListAggregate<t_CData, t_CTranslator, t_CLink, t_CLinkInList, t_bAutoDelete, t_CAllocator> &)_Data;
 		}
 	};
+
+	template <typename t_CStream, typename t_CType, typename ...tp_COptions>
+	class TCBinaryStreamTypeReference<t_CStream, NStorage::TCUniquePointer<t_CType, tp_COptions...>>
+	{
+	public:
+		static void fs_Feed(t_CStream &_Stream, NStorage::TCUniquePointer<t_CType, tp_COptions...> const &_pData)
+		{
+			uint8 bNonEmpty = !_pData.f_IsEmpty();
+			_Stream << bNonEmpty;
+			if (bNonEmpty)
+				_Stream << *_pData;
+		}
+
+		static void fs_Feed(t_CStream &_Stream, NStorage::TCUniquePointer<t_CType, tp_COptions...> &&_pData)
+		{
+			uint8 bNonEmpty = !_pData.f_IsEmpty();
+			_Stream << bNonEmpty;
+			if (bNonEmpty)
+				_Stream << fg_Move(*_pData);
+		}
+
+		static void fs_Consume(t_CStream &_Stream, NStorage::TCUniquePointer<t_CType, tp_COptions...> &_pData)
+		{
+			uint8 bNonEmpty;
+			_Stream >> bNonEmpty;
+			if (bNonEmpty)
+			{
+				_pData = fg_Construct();
+				_Stream >> *_pData;
+			}
+		}
+	};
+
+	template <typename t_CStream, typename t_CType, typename ...tp_COptions>
+	class TCBinaryStreamTypeReference<t_CStream, NStorage::TCSharedPointer<t_CType, tp_COptions...>>
+	{
+	public:
+		static void fs_Feed(t_CStream &_Stream, NStorage::TCSharedPointer<t_CType, tp_COptions...> const &_pData)
+		{
+			uint8 bNonEmpty = !_pData.f_IsEmpty();
+			_Stream << bNonEmpty;
+			if (bNonEmpty)
+				_Stream << *_pData;
+		}
+
+		static void fs_Feed(t_CStream &_Stream, NStorage::TCSharedPointer<t_CType, tp_COptions...> &&_pData)
+		{
+			return fs_Feed(_Stream, _pData);
+		}
+
+		static void fs_Consume(t_CStream &_Stream, NStorage::TCSharedPointer<t_CType, tp_COptions...> &_pData)
+		{
+			uint8 bNonEmpty;
+			_Stream >> bNonEmpty;
+			if (bNonEmpty)
+			{
+				_pData = fg_Construct();
+				_Stream >> *_pData;
+			}
+		}
+	};
 }
 
 #ifdef DMibIncluded_IntusiveAVLTree
