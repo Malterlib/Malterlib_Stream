@@ -58,7 +58,7 @@ namespace NMib::NStream
 	template <typename tf_CType>
 	NContainer::CSecureByteVector fg_ToSecureByteVector(const tf_CType &_CreateStreamFrom)
 	{
-		CBinaryStreamMemory<> Stream;
+		CBinaryStreamMemory<NStream::CBinaryStreamDefault, NContainer::CSecureByteVector> Stream;
 		Stream << _CreateStreamFrom;
 
 		return Stream.f_MoveVector();
@@ -67,7 +67,7 @@ namespace NMib::NStream
 	template <typename tf_CType>
 	NContainer::CSecureByteVector fg_ToSecureByteVectorBE(const tf_CType &_CreateStreamFrom)
 	{
-		CBinaryStreamMemory<NStream::CBinaryStreamBigEndian> Stream;
+		CBinaryStreamMemory<NStream::CBinaryStreamBigEndian, NContainer::CSecureByteVector> Stream;
 		Stream << _CreateStreamFrom;
 		return Stream.f_MoveVector();
 	}
