@@ -74,6 +74,16 @@ namespace NMib::NStream
 			return NMib::NStream::TCBinaryStreamTypeReferenceStream<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Stream(*this, NMib::fg_Forward<tf_CData>(_Data));
 		}
 
+		t_CStream &f_GetStream()
+		{
+			return *this;
+		}
+
+		t_CStream const &f_GetStream() const
+		{
+			return *this;
+		}
+
 		static constexpr EStreamDirection mc_Direction = t_Direction;
 		static constexpr bool mc_bConsume = mc_Direction == EStreamDirection_Consume;
 		static constexpr bool mc_bFeed = mc_Direction == EStreamDirection_Feed;
