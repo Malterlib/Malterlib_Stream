@@ -293,7 +293,7 @@ namespace NMib::NStream
 			if (_Length > NStream::CFilePos(m_Length))
 			{
 				fp_GrowBuffer(_Length - m_Length);
-				NMemory::fg_MemClear(m_pBuffer + m_Length, _Length - m_Length);
+				NMemory::fg_SecureMemClear(m_pBuffer + m_Length, _Length - m_Length);
 			}
 			m_Length = _Length;
 		}
@@ -515,7 +515,7 @@ namespace NMib::NStream
 			if (_Length > NStream::CFilePos(m_Length))
 			{
 				fp_GrowBuffer(_Length - m_Length);
-				NMemory::fg_MemClear(m_Buffer.f_GetArray() + m_Length, _Length - m_Length);
+				NMemory::fg_SecureMemClear(m_Buffer.f_GetArray() + m_Length, _Length - m_Length);
 			}
 			m_Length = _Length;
 		}
@@ -822,7 +822,7 @@ namespace NMib::NStream
 				this->fp_ThrowEndOfStreamException();;
 
 			if (_Length > NStream::CFilePos(m_Length))
-				NMemory::fg_MemClear(m_pMemoryData + m_Length, _Length - m_Length);
+				NMemory::fg_SecureMemClear(m_pMemoryData + m_Length, _Length - m_Length);
 			m_Length = _Length;
 		}
 		void *f_GetBuffer()
