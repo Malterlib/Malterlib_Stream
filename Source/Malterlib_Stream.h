@@ -357,88 +357,6 @@ namespace NMib::NStream
 		}
 	};
 
-	template <typename t_CKeyStr, typename t_CToStream>
-	class TCNamedStreamInfo
-	{
-		const t_CKeyStr &m_Key;
-		t_CToStream &m_ToStream;
-		const t_CToStream &m_Default;
-	public:
-		typedef t_CKeyStr CKey;
-		typedef t_CToStream CData;
-		TCNamedStreamInfo(t_CKeyStr const &_Key, t_CToStream &_ToStream, const t_CToStream &_Default)
-			: m_Key(_Key)
-			, m_ToStream(_ToStream)
-			, m_Default(_Default)
-		{
-		}
-
-		const t_CKeyStr &f_GetKey() const
-		{
-			return m_Key;
-		}
-
-		t_CToStream &f_GetValue() const
-		{
-			return m_ToStream;
-		}
-
-		t_CToStream const &f_GetDefault() const
-		{
-			return m_Default;
-		}
-
-	};
-
-	template <typename t_CKeyStr, typename t_CToStream, typename t_CToStreamDefault>
-	TCNamedStreamInfo<t_CKeyStr, t_CToStream> fg_Named(t_CKeyStr const &_Key, t_CToStream &_ToStream, t_CToStreamDefault const &_Default)
-	{
-		return TCNamedStreamInfo<t_CKeyStr, t_CToStream>(_Key, _ToStream, _Default);
-	}
-
-	template <typename t_CKeyStr, typename t_CToStream>
-	TCNamedStreamInfo<t_CKeyStr, t_CToStream const> fg_Named(t_CKeyStr const &_Key, t_CToStream const &_ToStream)
-	{
-		static t_CToStream s_Default;
-		return TCNamedStreamInfo<t_CKeyStr, t_CToStream const>(_Key, _ToStream, s_Default);
-	}
-
-	template <typename t_CStream, typename t_CData>
-	class TCBinaryStreamTypeReferenceNamed
-	{
-	public:
-		template <typename t_CData2>
-		inline_small static typename NMib::TCDisableIf<NMib::NTraits::TCIsEnum<typename t_CData2::CData>::mc_Value, void>::CType fs_Feed(t_CStream &_Stream, t_CData2 const &_Data)
-		{
-			auto pChild = _Stream.f_CreateChild(_Data.f_GetKey());
-			_Data.f_GetValue().f_FeedNamed(*pChild);
-		}
-		template <typename t_CData2>
-		inline_small static typename NMib::TCDisableIf<NMib::NTraits::TCIsEnum<typename t_CData2::CData>::mc_Value, void>::CType fs_Consume(t_CStream &_Stream, t_CData2 const &_Data)
-		{
-			auto pChild = _Stream.f_GetChild(_Data.f_GetKey());
-			if (pChild && _Data.f_GetValue().f_ConsumeNamed(*pChild))
-				return;
-			_Data.f_GetValue() = _Data.f_GetDefault();
-		}
-
-		template <typename t_CData2>
-		inline_small static typename NMib::TCEnableIf<NMib::NTraits::TCIsEnum<typename t_CData2::CData>::mc_Value, void>::CType fs_Feed(t_CStream &_Stream, t_CData2 const &_Data)
-		{
-			_Stream << fg_Named(_Data.f_GetKey(), uint32(_Data.f_GetValue()));
-		}
-		template <typename t_CData2>
-		inline_small static typename NMib::TCEnableIf<NMib::NTraits::TCIsEnum<typename t_CData2::CData>::mc_Value, void>::CType fs_Consume(t_CStream &_Stream, t_CData2 const &_Data)
-		{
-			uint32 Temp;
-			_Stream >> fg_Named(_Data.f_GetKey(), Temp, uint32(_Data.f_GetDefault()));
-			_Data.f_GetValue() = static_cast<typename t_CData2::CData>(Temp);
-		}
-	};
-
-	//&& !NTraits::TCIsSame<decltype(NMib::NStream::TCBinaryStreamTypeReference<tf_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Feed(_Stream, NMib::fg_Forward<tf_CData>(_Data))), NPrivate::CDummy>::mc_Value
-
-
 #	define DMibStreamImplementProtected(_Class) \
 		void fp_FeedBytes(const void *_pMem, mint _nBytes){_Class::f_FeedBytes(_pMem, _nBytes);}\
 		void fp_ConsumeBytes(void *_pMem, mint _nBytes){_Class::f_ConsumeBytes(_pMem, _nBytes);}\
@@ -1305,46 +1223,7 @@ namespace NMib::NStream
 		return TCBinaryStreamUnsafeWrapper<const t_CType>(_Type);
 	}
 
-	template <typename t_CStream, typename t_CKeyStr, typename t_CData>
-	class TCBinaryStreamTypeReference<t_CStream, TCNamedStreamInfo<t_CKeyStr, t_CData> >
-	{
-	public:
-		static void fs_Feed(t_CStream &_Stream, TCNamedStreamInfo<t_CKeyStr, t_CData> const &_Data)
-		{
-			_Stream << _Data.f_GetValue();
-		}
-		static void fs_Consume(t_CStream &_Stream, TCNamedStreamInfo<t_CKeyStr, t_CData> const &_Data)
-		{
-			_Stream >> _Data.f_GetValue();
-		}
-	};
-	template <typename t_CStream, typename t_CKeyStr, typename t_CData>
-	class TCBinaryStreamTypeReference<t_CStream, TCNamedStreamInfo<t_CKeyStr, t_CData const> >
-	{
-	public:
-		static void fs_Feed(t_CStream &_Stream, TCNamedStreamInfo<t_CKeyStr, t_CData const> const &_Data)
-		{
-			_Stream << _Data.f_GetValue();
-		}
-	};
-
-
-#	define DMibStreamImplementSimpleTypeDefault(_Type) \
-	template <typename t_CNamedStream, typename t_CKeyStrInfo> \
-	class TCBinaryStreamTypeReferenceNamed<t_CNamedStream, TCNamedStreamInfo<t_CKeyStrInfo, _Type> > \
-	{ \
-	public: \
-		static void fs_Feed(t_CNamedStream &_Stream, TCNamedStreamInfo<t_CKeyStrInfo, _Type const> const &_Data) \
-		{ \
-			_Stream.f_SetValue(_Data.f_GetKey(), t_CNamedStream::CData::fs_ToStr(_Data.f_GetValue()));\
-		}\
-		static void fs_Consume(t_CNamedStream &_Stream, TCNamedStreamInfo<t_CKeyStrInfo, _Type> const &_Data)\
-		{\
-			_Data.f_GetValue() = _Stream.f_GetValue(_Data.f_GetKey(), typename t_CNamedStream::CData()).f_ToValue(_Data.f_GetDefault());\
-		}\
-	};\
-
-#	define DMibStreamImplementSimpleEndianSwappedType(_Type) DMibStreamImplementSimpleTypeDefault(_Type) \
+#	define DMibStreamImplementSimpleEndianSwappedType(_Type) \
 	template <typename t_CStream> \
 	class TCBinaryStreamTypeReference<t_CStream, _Type> \
 	{ \
@@ -1374,7 +1253,7 @@ namespace NMib::NStream
 		}\
 	};
 
-#	define DMibStreamImplementSimpleEndianSwappedTypeUnsafe(_Type) DMibStreamImplementSimpleTypeDefault(_Type) \
+#	define DMibStreamImplementSimpleEndianSwappedTypeUnsafe(_Type) \
 	template <typename t_CStream> \
 	class TCBinaryStreamTypeReference<t_CStream, NMib::NStream::TCBinaryStreamUnsafeWrapper<const _Type> > \
 	{ \
@@ -1447,7 +1326,7 @@ namespace NMib::NStream
 	};
 
 
-#	define DMibStreamImplementSimpleType(_Type) DMibStreamImplementSimpleTypeDefault(_Type) \
+#	define DMibStreamImplementSimpleType(_Type) \
 	template <typename t_CStream> \
 	class TCBinaryStreamTypeReference<t_CStream, _Type> \
 	{ \
