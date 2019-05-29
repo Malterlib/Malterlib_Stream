@@ -235,12 +235,12 @@ namespace NMib::NStream
 			m_Position += _nBytes;
 		}
 
-		bint f_IsValid() const
+		bool f_IsValid() const
 		{
 			return true;
 		}
 
-		bint f_IsAtEndOfStream() const
+		bool f_IsAtEndOfStream() const
 		{
 			return m_Position == m_Length;
 		}
@@ -265,12 +265,12 @@ namespace NMib::NStream
 			fp_SetPositionInternal(m_Position + _Pos);
 		}
 
-		bint f_IsValidReadPosition(NStream::CFilePos _Pos) const
+		bool f_IsValidReadPosition(NStream::CFilePos _Pos) const
 		{
 			return _Pos >= 0 && _Pos < NStream::CFilePos(m_Length);
 		}
 
-		void f_Flush(bint _bLocalCacheOnly)
+		void f_Flush(bool _bLocalCacheOnly)
 		{
 		}
 
@@ -457,12 +457,12 @@ namespace NMib::NStream
 			m_Position += _nBytes;
 		}
 
-		bint f_IsValid() const
+		bool f_IsValid() const
 		{
 			return true;
 		}
 
-		bint f_IsAtEndOfStream() const
+		bool f_IsAtEndOfStream() const
 		{
 			return m_Position == m_Length;
 		}
@@ -487,12 +487,12 @@ namespace NMib::NStream
 			fp_SetPositionInternal(m_Position + _Pos);
 		}
 
-		bint f_IsValidReadPosition(NStream::CFilePos _Pos) const
+		bool f_IsValidReadPosition(NStream::CFilePos _Pos) const
 		{
 			return _Pos >= 0 && _Pos < NStream::CFilePos(m_Length);
 		}
 
-		void f_Flush(bint _bLocalCacheOnly)
+		void f_Flush(bool _bLocalCacheOnly)
 		{
 		}
 
@@ -616,12 +616,12 @@ namespace NMib::NStream
 			m_Position += _nBytes;
 		}
 
-		bint f_IsValid() const
+		bool f_IsValid() const
 		{
 			return true;
 		}
 
-		bint f_IsAtEndOfStream() const
+		bool f_IsAtEndOfStream() const
 		{
 			return m_Position == m_Length;
 		}
@@ -646,12 +646,12 @@ namespace NMib::NStream
 			fp_SetPositionInternal(m_Position + _Pos);
 		}
 
-		bint f_IsValidReadPosition(NStream::CFilePos _Pos) const
+		bool f_IsValidReadPosition(NStream::CFilePos _Pos) const
 		{
 			return _Pos >= 0 && _Pos < NStream::CFilePos(m_Length);
 		}
 
-		void f_Flush(bint _bLocalCacheOnly)
+		void f_Flush(bool _bLocalCacheOnly)
 		{
 		}
 
@@ -763,12 +763,12 @@ namespace NMib::NStream
 			m_Position += _nBytes;
 		}
 
-		bint f_IsValid() const
+		bool f_IsValid() const
 		{
 			return true;
 		}
 
-		bint f_IsAtEndOfStream() const
+		bool f_IsAtEndOfStream() const
 		{
 			return m_Position == m_Length;
 		}
@@ -793,12 +793,12 @@ namespace NMib::NStream
 			fp_SetPositionInternal(m_Position + _Pos);
 		}
 
-		bint f_IsValidReadPosition(NStream::CFilePos _Pos) const
+		bool f_IsValidReadPosition(NStream::CFilePos _Pos) const
 		{
 			return _Pos >= 0 && _Pos < NStream::CFilePos(m_Length);
 		}
 
-		void f_Flush(bint _bLocalCacheOnly)
+		void f_Flush(bool _bLocalCacheOnly)
 		{
 		}
 
@@ -921,12 +921,12 @@ namespace NMib::NStream
 			m_Position += _nBytes;
 		}
 
-		bint f_IsValid() const
+		bool f_IsValid() const
 		{
 			return m_pMemoryData ? true : false;
 		}
 
-		bint f_IsAtEndOfStream() const
+		bool f_IsAtEndOfStream() const
 		{
 			return m_Position == m_Length;
 		}
@@ -951,12 +951,12 @@ namespace NMib::NStream
 			fp_SetPositionInternal(m_Position + _Pos);
 		}
 
-		bint f_IsValidReadPosition(NStream::CFilePos _Pos) const
+		bool f_IsValidReadPosition(NStream::CFilePos _Pos) const
 		{
 			return _Pos >= 0 && _Pos < NStream::CFilePos(m_Length);
 		}
 
-		void f_Flush(bint _bLocalCacheOnly)
+		void f_Flush(bool _bLocalCacheOnly)
 		{
 		}
 
@@ -1052,12 +1052,12 @@ namespace NMib::NStream
 			m_pSubStream->f_ConsumeBytes(_pMem, _nBytes);
 		}
 
-		bint f_IsValid() const
+		bool f_IsValid() const
 		{
 			return m_pSubStream->f_IsValid();
 		}
 
-		bint f_IsAtEndOfStream() const
+		bool f_IsAtEndOfStream() const
 		{
 			if (m_MaxLength >= 0)
 			{
@@ -1124,7 +1124,7 @@ namespace NMib::NStream
 			return m_pSubStream->f_SetPosition(ResultingPos);
 		}
 
-		bint f_IsValidReadPosition(NStream::CFilePos _Pos) const
+		bool f_IsValidReadPosition(NStream::CFilePos _Pos) const
 		{
 			if (m_MaxLength >= 0)
 			{
@@ -1138,7 +1138,7 @@ namespace NMib::NStream
 			return m_pSubStream->f_IsValidReadPosition(m_SubPos + _Pos);
 		}
 
-		void f_Flush(bint _bLocalCacheOnly)
+		void f_Flush(bool _bLocalCacheOnly)
 		{
 			m_pSubStream->f_Flush(_bLocalCacheOnly);
 		}
@@ -1229,12 +1229,12 @@ namespace NMib::NStream
 				DMibPDebugBreak;
 		}
 
-		bint f_IsValid() const
+		bool f_IsValid() const
 		{
 			return m_pWriteToStream->f_IsValid();
 		}
 
-		bint f_IsAtEndOfStream() const
+		bool f_IsAtEndOfStream() const
 		{
 			return m_pWriteToStream->f_IsAtEndOfStream();
 		}
@@ -1271,12 +1271,12 @@ namespace NMib::NStream
 			m_pCompareToStream->f_SetPosition(NewPos);
 		}
 
-		bint f_IsValidReadPosition(NStream::CFilePos _Pos) const
+		bool f_IsValidReadPosition(NStream::CFilePos _Pos) const
 		{
 			return m_pWriteToStream->f_IsValidReadPosition(_Pos);
 		}
 
-		void f_Flush(bint _bLocalCacheOnly)
+		void f_Flush(bool _bLocalCacheOnly)
 		{
 			m_pWriteToStream->f_Flush(_bLocalCacheOnly);
 		}

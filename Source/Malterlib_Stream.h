@@ -360,14 +360,14 @@ namespace NMib::NStream
 #	define DMibStreamImplementProtected(_Class) \
 		void fp_FeedBytes(const void *_pMem, mint _nBytes){_Class::f_FeedBytes(_pMem, _nBytes);}\
 		void fp_ConsumeBytes(void *_pMem, mint _nBytes){_Class::f_ConsumeBytes(_pMem, _nBytes);}\
-		bint fp_IsValid() const {bint Ret = 0; Ret = _Class::f_IsValid(); return Ret;}\
-		bint fp_IsAtEndOfStream() const {bint Ret = 0; Ret = _Class::f_IsAtEndOfStream(); return Ret;}\
+		bool fp_IsValid() const {bool Ret = 0; Ret = _Class::f_IsValid(); return Ret;}\
+		bool fp_IsAtEndOfStream() const {bool Ret = 0; Ret = _Class::f_IsAtEndOfStream(); return Ret;}\
 		NMib::NStream::CFilePos fp_GetPosition() const {return _Class::f_GetPosition();}\
 		void fp_SetPosition(NMib::NStream::CFilePos _Pos){_Class::f_SetPosition(_Pos);}\
 		void fp_SetPositionFromEnd(NMib::NStream::CFilePos _Pos){_Class::f_SetPositionFromEnd(_Pos);}\
 		void fp_AddPosition(NMib::NStream::CFilePos _Pos){_Class::f_AddPosition(_Pos);}\
-		bint fp_IsValidReadPosition(NMib::NStream::CFilePos _Pos) const {bint bRet = 0; bRet = _Class::f_IsValidReadPosition(_Pos); return bRet; }\
-		void fp_Flush(bint _bLocalCacheOnly) {_Class::f_Flush(_bLocalCacheOnly);}\
+		bool fp_IsValidReadPosition(NMib::NStream::CFilePos _Pos) const {bool bRet = 0; bRet = _Class::f_IsValidReadPosition(_Pos); return bRet; }\
+		void fp_Flush(bool _bLocalCacheOnly) {_Class::f_Flush(_bLocalCacheOnly);}\
 		void fp_SetCacheSize(mint _CacheSize) {_Class::f_SetCacheSize(_CacheSize);}\
 		NMib::NStream::CFilePos fp_GetLength() const {NMib::NStream::CFilePos Ret = 0; Ret =_Class::f_GetLength(); return Ret;}\
 		void fp_SetLength(NMib::NStream::CFilePos _Length) {return _Class::f_SetLength(_Length);}\
@@ -410,14 +410,14 @@ namespace NMib::NStream
 	protected:
 		virtual void fp_FeedBytes(const void *_pMem, mint _nBytes) = 0;
 		virtual void fp_ConsumeBytes(void *_pMem, mint _nBytes) = 0;
-		virtual bint fp_IsValid() const = 0;
-		virtual bint fp_IsAtEndOfStream() const = 0;
+		virtual bool fp_IsValid() const = 0;
+		virtual bool fp_IsAtEndOfStream() const = 0;
 		virtual CFilePos fp_GetPosition() const = 0;
 		virtual void fp_SetPosition(CFilePos _Pos) = 0;
 		virtual void fp_SetPositionFromEnd(CFilePos _Pos) = 0;
 		virtual void fp_AddPosition(CFilePos _Pos) = 0;
-		virtual bint fp_IsValidReadPosition(NStream::CFilePos _Pos) const = 0;
-		virtual void fp_Flush(bint _bLocalCacheOnly) = 0;
+		virtual bool fp_IsValidReadPosition(NStream::CFilePos _Pos) const = 0;
+		virtual void fp_Flush(bool _bLocalCacheOnly) = 0;
 		virtual void fp_SetCacheSize(mint _CacheSize) = 0;
 		virtual CFilePos fp_GetLength() const = 0;
 		virtual void fp_SetLength(CFilePos _Length) = 0;
@@ -437,14 +437,14 @@ namespace NMib::NStream
 #ifdef DMibTempStreamDebug
 		DMibTempStreamPre void f_FeedBytes(const void *_pMem, mint _nBytes) DMibTempStreamPost;
 		DMibTempStreamPre void f_ConsumeBytes(void *_pMem, mint _nBytes) DMibTempStreamPost;
-		DMibTempStreamPre bint f_IsValid() const DMibTempStreamPost;
-		DMibTempStreamPre bint f_IsAtEndOfStream() const DMibTempStreamPost;
+		DMibTempStreamPre bool f_IsValid() const DMibTempStreamPost;
+		DMibTempStreamPre bool f_IsAtEndOfStream() const DMibTempStreamPost;
 		DMibTempStreamPre CFilePos f_GetPosition() const DMibTempStreamPost;
 		DMibTempStreamPre void f_SetPosition(CFilePos _Pos) DMibTempStreamPost;
 		DMibTempStreamPre void f_SetPositionFromEnd(CFilePos _Pos) DMibTempStreamPost;
 		DMibTempStreamPre void f_AddPosition(CFilePos _Pos) DMibTempStreamPost;
-		DMibTempStreamPre bint f_IsValidReadPosition(CFilePos _Pos) const DMibTempStreamPost;
-		DMibTempStreamPre void f_Flush(bint _bLocalCacheOnly) DMibTempStreamPost;
+		DMibTempStreamPre bool f_IsValidReadPosition(CFilePos _Pos) const DMibTempStreamPost;
+		DMibTempStreamPre void f_Flush(bool _bLocalCacheOnly) DMibTempStreamPost;
 		DMibTempStreamPre void f_SetCacheSize(mint _CacheSize) DMibTempStreamPost;
 		DMibTempStreamPre CFilePos f_GetLength() const DMibTempStreamPost;
 		DMibTempStreamPre void f_SetLength(CFilePos _Length) DMibTempStreamPost;
@@ -463,12 +463,12 @@ namespace NMib::NStream
 			fp_ConsumeBytes(_pMem, _nBytes);
 		}
 
-		DMibTempStreamPre bint f_IsValid() const DMibTempStreamPost
+		DMibTempStreamPre bool f_IsValid() const DMibTempStreamPost
 		{
 			return fp_IsValid();
 		}
 
-		DMibTempStreamPre bint f_IsAtEndOfStream() const DMibTempStreamPost
+		DMibTempStreamPre bool f_IsAtEndOfStream() const DMibTempStreamPost
 		{
 			return fp_IsAtEndOfStream();
 		}
@@ -492,12 +492,12 @@ namespace NMib::NStream
 		{
 			fp_AddPosition(_Pos);
 		}
-		DMibTempStreamPre bint f_IsValidReadPosition(NStream::CFilePos _Pos) const
+		DMibTempStreamPre bool f_IsValidReadPosition(NStream::CFilePos _Pos) const
 		{
 			return fp_IsValidReadPosition(_Pos);
 		}
 
-		DMibTempStreamPre void f_Flush(bint _bLocalCacheOnly)
+		DMibTempStreamPre void f_Flush(bool _bLocalCacheOnly)
 		{
 			return fp_Flush(_bLocalCacheOnly);
 		}
@@ -965,12 +965,12 @@ namespace NMib::NStream
 			m_Position += _nBytes;
 		}
 
-		bint f_IsValid() const
+		bool f_IsValid() const
 		{
 			return true;
 		}
 
-		bint f_IsAtEndOfStream() const
+		bool f_IsAtEndOfStream() const
 		{
 			return m_Position == m_Length;
 		}
@@ -995,12 +995,12 @@ namespace NMib::NStream
 			fp_SetPositionInternal(m_Position + _Pos);
 		}
 
-		bint f_IsValidReadPosition(NStream::CFilePos _Pos) const
+		bool f_IsValidReadPosition(NStream::CFilePos _Pos) const
 		{
 			return _Pos >= 0 && _Pos < NStream::CFilePos(m_Length);
 		}
 
-		void f_Flush(bint _bLocalCacheOnly)
+		void f_Flush(bool _bLocalCacheOnly)
 		{
 		}
 
@@ -1406,7 +1406,7 @@ namespace NMib::NStream
 	DMibStreamImplementSimpleEndianSwappedType(fp64);
 
 
-	template <typename t_CStream, typename t_CData, typename t_CTranslator, typename t_CLink, typename t_CLinkInList, bint t_bAutoDelete, typename t_CAllocator>
+	template <typename t_CStream, typename t_CData, typename t_CTranslator, typename t_CLink, typename t_CLinkInList, bool t_bAutoDelete, typename t_CAllocator>
 	class TCBinaryStreamTypeReference<t_CStream, NIntrusive::TCDLinkListAggregate<t_CData, t_CTranslator, t_CLink, t_CLinkInList, t_bAutoDelete, t_CAllocator> >
 	{
 	public:
@@ -1481,7 +1481,7 @@ namespace NMib::NStream
 		}
 	};
 
-	template <typename t_CStream, typename t_CData, typename t_CTranslator, typename t_CLink, typename t_CLinkInList, bint t_bAutoDelete, typename t_CAllocator>
+	template <typename t_CStream, typename t_CData, typename t_CTranslator, typename t_CLink, typename t_CLinkInList, bool t_bAutoDelete, typename t_CAllocator>
 	class TCBinaryStreamTypeReference<t_CStream, NIntrusive::TCDLinkList<t_CData, t_CTranslator, t_CLink, t_CLinkInList, t_bAutoDelete, t_CAllocator> >
 	{
 	public:
