@@ -1113,7 +1113,8 @@ namespace NMib::NStream
 			uint64 LenStream = Len;
 			fg_StrEncodeLenType(LenStream, _Stream.f_LengthSize(), NStr::EStrType_UTF); // Presume UTF, as this is the most probable case
 			fg_FeedLenToStream(_Stream, LenStream);
-			_Stream.f_FeedBytes(_pData, Len);
+			if (Len != 0)
+				_Stream.f_FeedBytes(_pData, Len);
 		}
 		static void fs_Consume(t_CStream &_Stream, ch8 *_pData)
 		{
@@ -1122,7 +1123,8 @@ namespace NMib::NStream
 			NStr::EStrType Type = NStr::EStrType_Ansi;
 			fg_StrDecodeLenType(Len, _Stream.f_LengthSize(), Type);
 			fg_CheckLengthLimit(_Stream, Len);
-			_Stream.f_ConsumeBytes(_pData, Len);
+			if (Len != 0)
+				_Stream.f_ConsumeBytes(_pData, Len);
 			_pData[Len] = 0;
 		}
 	};

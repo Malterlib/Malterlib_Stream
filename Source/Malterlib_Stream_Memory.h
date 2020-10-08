@@ -217,12 +217,18 @@ namespace NMib::NStream
 			mint CurrentLen = m_BufferSize;
 			mint Position = m_Position;
 			mint NeededSize = _nBytes + Position;
+
 			if (CurrentLen < NeededSize)
 				fp_GrowBufferGrow(NeededSize);
-			NMemory::fg_MemCopy(m_pBuffer + Position, _pMem, _nBytes);
+
+			if (_nBytes != 0)
+				NMemory::fg_MemCopy(m_pBuffer + Position, _pMem, _nBytes);
+
 			Position += _nBytes;
+
 			if (Position > m_Length)
 				m_Length = Position;
+
 			m_Position = Position;
 		}
 
@@ -231,7 +237,9 @@ namespace NMib::NStream
 			if (unlikely(m_Length < (m_Position + _nBytes)))
 				this->fp_ThrowEndOfStreamException();
 
-			NMemory::fg_MemCopy(_pMem, m_pBuffer + m_Position, _nBytes);
+			if (_nBytes != 0)
+				NMemory::fg_MemCopy(_pMem, m_pBuffer + m_Position, _nBytes);
+
 			m_Position += _nBytes;
 		}
 
@@ -441,7 +449,10 @@ namespace NMib::NStream
 		void f_FeedBytes(const void *_pMem, mint _nBytes)
 		{
 			fp_GrowBuffer(_nBytes);
-			NMemory::fg_MemCopy(m_Buffer.f_GetArray() + m_Position, _pMem, _nBytes);
+
+			if (_nBytes != 0)
+				NMemory::fg_MemCopy(m_Buffer.f_GetArray() + m_Position, _pMem, _nBytes);
+
 			m_Position += _nBytes;
 			if (m_Position > m_Length)
 				m_Length = m_Position;
@@ -453,7 +464,9 @@ namespace NMib::NStream
 			if (unlikely(m_Length < (m_Position + _nBytes)))
 				this->fp_ThrowEndOfStreamException();
 
-			NMemory::fg_MemCopy(_pMem, m_Buffer.f_GetArray() + m_Position, _nBytes);
+			if (_nBytes != 0)
+				NMemory::fg_MemCopy(_pMem, m_Buffer.f_GetArray() + m_Position, _nBytes);
+
 			m_Position += _nBytes;
 		}
 
@@ -612,7 +625,9 @@ namespace NMib::NStream
 			if (unlikely(m_Length < (m_Position + _nBytes)))
 				this->fp_ThrowEndOfStreamException();;
 
-			NMemory::fg_MemCopy(_pMem, m_Buffer.f_GetArray() + m_Position, _nBytes);
+			if (_nBytes != 0)
+				NMemory::fg_MemCopy(_pMem, m_Buffer.f_GetArray() + m_Position, _nBytes);
+
 			m_Position += _nBytes;
 		}
 
@@ -748,7 +763,9 @@ namespace NMib::NStream
 			if (unlikely(m_MaxLength < (m_Position + _nBytes)))
 				this->fp_ThrowEndOfStreamException();;
 
-			NMemory::fg_MemCopy(m_pMemoryData + m_Position, _pMem, _nBytes);
+			if (_nBytes != 0)
+				NMemory::fg_MemCopy(m_pMemoryData + m_Position, _pMem, _nBytes);
+
 			m_Position += _nBytes;
 			if (m_Position > m_Length)
 				m_Length = m_Position;
@@ -759,7 +776,9 @@ namespace NMib::NStream
 			if (unlikely(m_Length < (m_Position + _nBytes)))
 				this->fp_ThrowEndOfStreamException();;
 
-			NMemory::fg_MemCopy(_pMem, m_pMemoryData + m_Position, _nBytes);
+			if (_nBytes != 0)
+				NMemory::fg_MemCopy(_pMem, m_pMemoryData + m_Position, _nBytes);
+
 			m_Position += _nBytes;
 		}
 
@@ -917,7 +936,9 @@ namespace NMib::NStream
 			if (unlikely(m_Length < (m_Position + _nBytes)))
 				this->fp_ThrowEndOfStreamException();;
 
-			NMemory::fg_MemCopy(_pMem, m_pMemoryData + m_Position, _nBytes);
+			if (_nBytes != 0)
+				NMemory::fg_MemCopy(_pMem, m_pMemoryData + m_Position, _nBytes);
+
 			m_Position += _nBytes;
 		}
 
