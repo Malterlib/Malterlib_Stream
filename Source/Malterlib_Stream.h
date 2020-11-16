@@ -1211,6 +1211,10 @@ namespace NMib::NStream
 		{
 			_Stream >> _Data.m_Data;
 		}
+		static void fs_Consume(t_CStream &_Stream, NMib::NStream::TCBinaryStreamUnsafeWrapper<t_CType> &&_Data)
+		{
+			_Stream >> _Data.m_Data;
+		}
 	};
 
 	template <typename t_CType>
