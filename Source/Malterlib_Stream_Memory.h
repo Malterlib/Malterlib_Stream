@@ -234,7 +234,7 @@ namespace NMib::NStream
 
 		void f_ConsumeBytes(void *_pMem, mint _nBytes)
 		{
-			if (unlikely(m_Length < (m_Position + _nBytes)))
+			if (m_Length < (m_Position + _nBytes)) [[unlikely]]
 				this->fp_ThrowEndOfStreamException();
 
 			if (_nBytes != 0)
@@ -461,7 +461,7 @@ namespace NMib::NStream
 
 		void f_ConsumeBytes(void *_pMem, mint _nBytes)
 		{
-			if (unlikely(m_Length < (m_Position + _nBytes)))
+			if (m_Length < (m_Position + _nBytes)) [[unlikely]]
 				this->fp_ThrowEndOfStreamException();
 
 			if (_nBytes != 0)
@@ -622,7 +622,7 @@ namespace NMib::NStream
 
 		void f_ConsumeBytes(void *_pMem, mint _nBytes)
 		{
-			if (unlikely(m_Length < (m_Position + _nBytes)))
+			if (m_Length < (m_Position + _nBytes)) [[unlikely]]
 				this->fp_ThrowEndOfStreamException();;
 
 			if (_nBytes != 0)
@@ -760,7 +760,7 @@ namespace NMib::NStream
 
 		void f_FeedBytes(const void *_pMem, mint _nBytes)
 		{
-			if (unlikely(m_MaxLength < (m_Position + _nBytes)))
+			if (m_MaxLength < (m_Position + _nBytes)) [[unlikely]]
 				this->fp_ThrowEndOfStreamException();;
 
 			if (_nBytes != 0)
@@ -773,7 +773,7 @@ namespace NMib::NStream
 
 		void f_ConsumeBytes(void *_pMem, mint _nBytes)
 		{
-			if (unlikely(m_Length < (m_Position + _nBytes)))
+			if (m_Length < (m_Position + _nBytes)) [[unlikely]]
 				this->fp_ThrowEndOfStreamException();;
 
 			if (_nBytes != 0)
@@ -837,7 +837,7 @@ namespace NMib::NStream
 
 		void f_SetLength(NStream::CFilePos _Length)
 		{
-			if (unlikely(_Length > NStream::CFilePos(m_MaxLength)))
+			if (_Length > NStream::CFilePos(m_MaxLength)) [[unlikely]]
 				this->fp_ThrowEndOfStreamException();;
 
 			if (_Length > NStream::CFilePos(m_Length))
@@ -933,7 +933,7 @@ namespace NMib::NStream
 
 		void f_ConsumeBytes(void *_pMem, mint _nBytes)
 		{
-			if (unlikely(m_Length < (m_Position + _nBytes)))
+			if (m_Length < (m_Position + _nBytes)) [[unlikely]]
 				this->fp_ThrowEndOfStreamException();;
 
 			if (_nBytes != 0)
