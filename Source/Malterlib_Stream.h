@@ -1414,7 +1414,7 @@ namespace NMib::NStream
 
 			while(nItems)
 			{
-				auto Memory = t_CAllocator::f_AllocSafe(sizeof(t_CData), NTraits::TCAlignmentOf<t_CData>::mc_Value);
+				auto Memory = t_CAllocator::f_AllocSafe(sizeof(t_CData), alignof(t_CData));
 				t_CData *pNewItem = new(Memory.m_pMemory) t_CData();
 				Memory.f_Claim();
 				auto Cleanup = g_OnScopeExit > [&]
