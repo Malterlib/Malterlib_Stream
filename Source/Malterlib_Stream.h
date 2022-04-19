@@ -1022,7 +1022,10 @@ namespace NMib::NStream
 	void fg_FeedEndianArrayToStream(t_CStream &_Stream, const t_CData *_pData, mint _Len, aint _Endian)
 	{
 		if (_Endian == EEndian_Native || _Endian == gc_MachineEndian)
-			_Stream.f_FeedBytes(_pData, _Len * sizeof(t_CData));
+		{
+			if (_Len != 0)
+				_Stream.f_FeedBytes(_pData, _Len * sizeof(t_CData));
+		}
 		else
 		{
 			for (mint i = 0; i < _Len; ++i)
@@ -1092,7 +1095,8 @@ namespace NMib::NStream
 			NStr::EStrType Type = NStr::EStrType_Ansi;
 			fg_StrDecodeLenType(Len, _Stream.f_LengthSize(), Type);
 			fg_CheckLengthLimit(_Stream, Len);
-			_Stream.f_ConsumeBytes(_pData, Len);
+			if (Len != 0)
+				_Stream.f_ConsumeBytes(_pData, Len);
 			fg_ByteSwapArray(_Stream, _pData, Len, _Stream.f_Endian());
 			_pData[Len] = 0;
 		}
@@ -1117,7 +1121,8 @@ namespace NMib::NStream
 			NStr::EStrType Type = NStr::EStrType_Ansi;
 			fg_StrDecodeLenType(Len, _Stream.f_LengthSize(), Type);
 			fg_CheckLengthLimit(_Stream, Len);
-			_Stream.f_ConsumeBytes(_pData, Len);
+			if (Len != 0)
+				_Stream.f_ConsumeBytes(_pData, Len);
 			fg_ByteSwapArray(_Stream, _pData, Len, _Stream.f_Endian());
 			_pData[Len] = 0;
 		}
