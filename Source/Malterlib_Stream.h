@@ -774,8 +774,11 @@ namespace NMib::NStream
 
 	};
 
-	class CBinaryStreamDefaultRef : public CBinaryStreamDefault, public NStorage::TCSharedPointerIntrusiveBase<>
+	class CBinaryStreamDefaultRef : public CBinaryStreamDefault
 	{
+	public:
+		NStorage::CIntrusiveRefCount m_RefCount;
+
 	private:
 		CBinaryStreamDefaultRef(CBinaryStreamDefaultRef const &) = delete;
 		CBinaryStreamDefaultRef &operator = (CBinaryStreamDefaultRef const &) = delete;
