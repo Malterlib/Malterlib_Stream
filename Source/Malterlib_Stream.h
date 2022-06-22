@@ -972,6 +972,14 @@ namespace NMib::NStream
 	};
 	// Default types
 
+	template <typename tf_CType>
+	CFilePos fg_GetBinaryStreamSize(tf_CType const &_Value)
+	{
+		TCBinaryStreamNull<> SizeStream;
+		SizeStream << _Value;
+		return SizeStream.f_GetPosition();
+	}
+
 	template <typename t_CStream>
 	void fg_FeedLenToStream(t_CStream &_Stream, uint64 _Len)
 	{
