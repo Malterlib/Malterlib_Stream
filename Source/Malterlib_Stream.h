@@ -1431,7 +1431,7 @@ namespace NMib::NStream
 				Memory.f_Claim();
 				auto Cleanup = g_OnScopeExit / [&]
 					{
-						pNewItem->~CNode();
+						pNewItem->~t_CData();
 						t_CAllocator::f_Free(pNewItem, sizeof(t_CData));
 					}
 				;
