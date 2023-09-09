@@ -321,20 +321,30 @@ namespace NMib::NStream
 			return fg_Forward<tf_CData>(_Data).f_Stream(reinterpret_cast<TCStreamDirection<t_CStream, EStreamDirection_Consume> &>(_Stream));
 		}
 
-		// Enum
-
 		template <typename tf_CData, typename NMib::TCEnableIf<NMib::NTraits::TCIsEnum<tf_CData>::mc_Value, void>::CType * = nullptr>
 		constexpr inline_small static void fs_Feed(t_CStream &_Stream, tf_CData const &_Data)
 		{
-			_Stream << uint32(_Data);
+			if constexpr (NTraits::cIsScopedEnum<tf_CData>)
+				_Stream << NTraits::TCEnumUnderlyingType<tf_CData>(_Data);
+			else
+				_Stream << uint32(_Data);
 		}
 
 		template <typename tf_CData, typename NMib::TCEnableIf<NMib::NTraits::TCIsEnum<tf_CData>::mc_Value, void>::CType * = nullptr>
 		constexpr inline_small static void fs_Consume(t_CStream &_Stream, tf_CData &_Data)
 		{
-			uint32 Temp;
-			_Stream >> Temp;
-			_Data = static_cast<tf_CData>(Temp);
+			if constexpr (NTraits::cIsScopedEnum<tf_CData>)
+			{
+				NTraits::TCEnumUnderlyingType<tf_CData> Temp;
+				_Stream >> Temp;
+				_Data = static_cast<tf_CData>(Temp);
+			}
+			else
+			{
+				uint32 Temp;
+				_Stream >> Temp;
+				_Data = static_cast<tf_CData>(Temp);
+			}
 		}
 	};
 
