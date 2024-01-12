@@ -41,6 +41,53 @@ namespace NMib::NStream
 	template <typename t_CStream, typename t_CData>
 	class TCBinaryStreamTypePtr;
 
+	template <typename t_CType>
+	concept cIsValidStreamVersion =
+		(
+			NTraits::TCIsEnum<t_CType>::mc_Value
+			&& (sizeof(NTraits::TCEnumUnderlyingType<t_CType>) <= sizeof(uint32))
+			&& !NTraits::TCIsSigned<NTraits::TCEnumUnderlyingType<t_CType>>::mc_Value
+		)
+		||
+		(
+			NTraits::TCIsInteger<t_CType>::mc_Value
+			&& (sizeof(t_CType) <= sizeof(uint32))
+			&& !NTraits::TCIsSigned<t_CType>::mc_Value
+		)
+	;
+
+	class CBinaryStream;
+
+	struct [[nodiscard("You need to store version to keep it in scope")]] CScopeBinaryStreamVersion
+	{
+		CScopeBinaryStreamVersion() = delete;
+		CScopeBinaryStreamVersion(CScopeBinaryStreamVersion &&_Other) = delete;
+		CScopeBinaryStreamVersion & operator = (CScopeBinaryStreamVersion &&_Other) = delete;
+		CScopeBinaryStreamVersion(CScopeBinaryStreamVersion const &_Other) = delete;
+		CScopeBinaryStreamVersion & operator = (CScopeBinaryStreamVersion const &_Other) = delete;
+
+		constexpr CScopeBinaryStreamVersion(CBinaryStream &_Stream, uint32 _Version);
+
+		template <typename tf_CVersion>
+		constexpr CScopeBinaryStreamVersion(CBinaryStream &_Stream, tf_CVersion _Version)
+			requires(cIsValidStreamVersion<tf_CVersion>)
+		;
+
+		constexpr void f_SetVersion(CBinaryStream &_Stream, uint32 _Version);
+
+		template <typename tf_CVersion>
+		constexpr void f_SetVersion(CBinaryStream &_Stream, tf_CVersion _Version)
+			requires(cIsValidStreamVersion<tf_CVersion>)
+		;
+
+		constexpr ~CScopeBinaryStreamVersion();
+		constexpr void f_Clear();
+
+	private:
+		CBinaryStream *mp_pStream = nullptr;
+		uint32 mp_OldVersion;
+	};
+
 #	define DMibStreamImplementOperatorsOperators(_Class) \
 		template <typename tf_CData> constexpr inline_small _Class &operator << (tf_CData &&_Data) { this->f_Feed(fg_Forward<tf_CData>(_Data)); return *this; }\
 		template <typename tf_CData> constexpr inline_small _Class &operator >> (tf_CData &&_Data) { this->f_Consume(fg_Forward<tf_CData>(_Data)); return *this; }\
@@ -53,7 +100,13 @@ namespace NMib::NStream
 		template <typename tf_CData> constexpr inline_small auto f_Feed(const tf_CData *_pData){return NMib::NStream::TCBinaryStreamTypePtr<_Class, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Feed(*this, _pData);} \
 		template <typename tf_CData> constexpr inline_small auto f_Consume(tf_CData &&_Data){return NMib::NStream::TCBinaryStreamTypeReference<_Class, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Consume(*this, NMib::fg_Forward<tf_CData>(_Data));} \
 		template <typename tf_CData> constexpr inline_small auto f_Consume(tf_CData *_pData){return NMib::NStream::TCBinaryStreamTypePtr<_Class, tf_CData>::fs_Consume(*this, _pData);} \
-		template <typename tf_CData> constexpr inline_small auto f_Stream(tf_CData &&_Data){return NMib::NStream::TCBinaryStreamTypeReferenceStream<_Class, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Stream(*this, NMib::fg_Forward<tf_CData>(_Data));}\
+		template <typename tf_CData> constexpr inline_small auto f_Stream(tf_CData &&_Data){return NMib::NStream::TCBinaryStreamTypeReferenceStream<_Class, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Stream(*this, NMib::fg_Forward<tf_CData>(_Data));} \
+		template <typename tf_CData> constexpr inline_small NMib::NStream::CScopeBinaryStreamVersion f_StreamVersion(tf_CData &&_DefaultVersion) \
+		{ \
+			auto Version = _DefaultVersion; \
+			this->f_Stream(Version); \
+			return NMib::NStream::CScopeBinaryStreamVersion(*this, Version); \
+		} \
 		DMibStreamImplementOperatorsOperators(_Class)
 
 	template <typename t_CStream, EStreamDirection t_Direction>
@@ -62,27 +115,34 @@ namespace NMib::NStream
 		template <typename tf_CData>
 		constexpr inline_small auto f_Feed(tf_CData &&_Data)
 		{
-			return NMib::NStream::TCBinaryStreamTypeReference<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Feed(*this, NMib::fg_Forward<tf_CData>(_Data));
+			return TCBinaryStreamTypeReference<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Feed(*this, NMib::fg_Forward<tf_CData>(_Data));
 		}
 		template <typename tf_CData>
 		constexpr inline_small auto f_Feed(const tf_CData *_pData)
 		{
-			return NMib::NStream::TCBinaryStreamTypePtr<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Feed(*this, _pData);
+			return TCBinaryStreamTypePtr<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Feed(*this, _pData);
 		}
 		template <typename tf_CData>
 		constexpr inline_small auto f_Consume(tf_CData &&_Data)
 		{
-			return NMib::NStream::TCBinaryStreamTypeReference<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Consume(*this, NMib::fg_Forward<tf_CData>(_Data));
+			return TCBinaryStreamTypeReference<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Consume(*this, NMib::fg_Forward<tf_CData>(_Data));
 		}
 		template <typename tf_CData>
 		constexpr inline_small auto f_Consume(tf_CData *_pData)
 		{
-			return NMib::NStream::TCBinaryStreamTypePtr<t_CStream, tf_CData>::fs_Consume(*this, _pData);
+			return TCBinaryStreamTypePtr<t_CStream, tf_CData>::fs_Consume(*this, _pData);
 		}
 		template <typename tf_CData>
 		constexpr inline_small auto f_Stream(tf_CData &&_Data)
 		{
-			return NMib::NStream::TCBinaryStreamTypeReferenceStream<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Stream(*this, NMib::fg_Forward<tf_CData>(_Data));
+			return TCBinaryStreamTypeReferenceStream<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Stream(*this, NMib::fg_Forward<tf_CData>(_Data));
+		}
+		template <typename tf_CData>
+		constexpr inline_small CScopeBinaryStreamVersion f_StreamVersion(tf_CData &&_DefaultVersion)
+		{
+			auto Version = _DefaultVersion;
+			this->f_Stream(Version);
+			return CScopeBinaryStreamVersion(*this, Version);
 		}
 
 		DMibStreamImplementOperatorsOperators(TCStreamDirection);
@@ -408,13 +468,12 @@ namespace NMib::NStream
 #		define DMibTempStreamPost
 #	endif
 
-	class CScopeBinaryStreamVersion;
 	class CScopeBinaryStreamContext;
 	class CScopeBinaryStreamContainerLengthLimit;
 
 	class CBinaryStream
 	{
-		friend class CScopeBinaryStreamVersion;
+		friend struct CScopeBinaryStreamVersion;
 		friend class CScopeBinaryStreamContext;
 		friend class CScopeBinaryStreamContainerLengthLimit;
 	public:
@@ -563,6 +622,14 @@ namespace NMib::NStream
 		{
 			return m_Version;
 		}
+
+		template <typename tf_CVersion>
+		inline_small bool f_SupportsVersion(tf_CVersion _Version) const
+			requires(cIsValidStreamVersion<tf_CVersion>)
+		{
+			return m_Version >= uint32(_Version);
+		}
+
 		inline_small void *f_GetContext() const
 		{
 			return m_pContext;
@@ -601,44 +668,6 @@ namespace NMib::NStream
 		CFilePos EndPosition = fg_AlignUp(Position, CFilePos(_Alignment));
 		_Stream.f_SetPosition(EndPosition);
 	}
-
-	class CScopeBinaryStreamVersion
-	{
-	public:
-		CScopeBinaryStreamVersion() = delete;
-		CScopeBinaryStreamVersion(const CScopeBinaryStreamVersion &_Other) = delete;
-		CScopeBinaryStreamVersion & operator = (CScopeBinaryStreamVersion const &) = delete;
-
-		CScopeBinaryStreamVersion(CBinaryStream &_Stream, uint32 _Version)
-			: mp_pStream(&_Stream)
-		{
-			mp_OldVersion = _Stream.m_Version;
-			_Stream.m_Version = _Version;
-		}
-		void f_SetVersion(CBinaryStream &_Stream, uint32 _Version)
-		{
-			f_Clear();
-			mp_pStream = &_Stream;
-			mp_OldVersion = _Stream.m_Version;
-			_Stream.m_Version = _Version;
-		}
-		~CScopeBinaryStreamVersion()
-		{
-			f_Clear();
-		}
-		void f_Clear()
-		{
-			if (mp_pStream)
-			{
-				mp_pStream->m_Version = mp_OldVersion;
-				mp_pStream = nullptr;
-			}
-		}
-
-	private:
-		CBinaryStream *mp_pStream;
-		uint32 mp_OldVersion;
-	};
 
 #	define DMibBinaryStreamVersion(_Stream, _Version) NMib::NStream::CScopeBinaryStreamVersion ScopeBinaryStreamVersion(_Stream, _Version)
 
@@ -1542,3 +1571,5 @@ namespace NMib::NStream
 #ifndef DMibPNoShortCuts
 	using namespace NMib::NStream;
 #endif
+
+#include "Malterlib_Stream.hpp"
