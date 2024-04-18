@@ -440,6 +440,38 @@ namespace NMib::NStream
 		}
 	};
 
+#	if defined(DMibDebug) && 0
+#		define DMibTempStreamDebug
+#		define DMibTempStreamPre virtual
+#		define DMibTempStreamPost =0
+#	else
+#		define DMibTempStreamPre inline_small
+#		define DMibTempStreamPost
+#	endif
+
+#ifdef DMibTempStreamDebug
+
+#	define DMibStreamImplementProtected(_Class) \
+		void fp_FeedBytes(const void *_pMem, mint _nBytes){this->f_FeedBytes(_pMem, _nBytes);}\
+		void fp_ConsumeBytes(void *_pMem, mint _nBytes){this->f_ConsumeBytes(_pMem, _nBytes);}\
+		bool fp_IsValid() const {bool Ret = 0; Ret = this->f_IsValid(); return Ret;}\
+		bool fp_IsAtEndOfStream() const {bool Ret = 0; Ret = this->f_IsAtEndOfStream(); return Ret;}\
+		NMib::NStream::CFilePos fp_GetPosition() const {return this->f_GetPosition();}\
+		void fp_SetPosition(NMib::NStream::CFilePos _Pos){this->f_SetPosition(_Pos);}\
+		void fp_SetPositionFromEnd(NMib::NStream::CFilePos _Pos){this->f_SetPositionFromEnd(_Pos);}\
+		void fp_AddPosition(NMib::NStream::CFilePos _Pos){this->f_AddPosition(_Pos);}\
+		bool fp_IsValidReadPosition(NMib::NStream::CFilePos _Pos) const {bool bRet = 0; bRet = this->f_IsValidReadPosition(_Pos); return bRet; }\
+		void fp_Flush(bool _bLocalCacheOnly) {this->f_Flush(_bLocalCacheOnly);}\
+		void fp_SetCacheSize(mint _CacheSize) {this->f_SetCacheSize(_CacheSize);}\
+		NMib::NStream::CFilePos fp_GetLength() const {NMib::NStream::CFilePos Ret = 0; Ret = this->f_GetLength(); return Ret;}\
+		void fp_SetLength(NMib::NStream::CFilePos _Length) {return this->f_SetLength(_Length);}\
+		aint fp_LengthSize() const {aint Ret = 0; Ret = this->f_LengthSize(); return Ret;}\
+		aint fp_Endian() const {aint Ret = 0; Ret = this->f_Endian(); return Ret;}\
+		mint fp_ContainerLengthLimit() const {mint Ret = 0; Ret = this->f_ContainerLengthLimit(); return Ret;}\
+		void fp_FeedFromStream(NMib::NStream::CBinaryStream &_Stream, NMib::NStream::CFilePos _nBytes){this->f_FeedFromStream(_Stream, _nBytes);}\
+
+#else
+
 #	define DMibStreamImplementProtected(_Class) \
 		void fp_FeedBytes(const void *_pMem, mint _nBytes){_Class::f_FeedBytes(_pMem, _nBytes);}\
 		void fp_ConsumeBytes(void *_pMem, mint _nBytes){_Class::f_ConsumeBytes(_pMem, _nBytes);}\
@@ -459,14 +491,7 @@ namespace NMib::NStream
 		mint fp_ContainerLengthLimit() const {mint Ret = 0; Ret = _Class::f_ContainerLengthLimit(); return Ret;}\
 		void fp_FeedFromStream(NMib::NStream::CBinaryStream &_Stream, NMib::NStream::CFilePos _nBytes){_Class::f_FeedFromStream(_Stream, _nBytes);}\
 
-#	if defined(DMibDebug) && 0
-#		define DMibTempStreamDebug
-#		define DMibTempStreamPre virtual
-#		define DMibTempStreamPost =0
-#	else
-#		define DMibTempStreamPre inline_small
-#		define DMibTempStreamPost
-#	endif
+#endif
 
 	class CScopeBinaryStreamContext;
 	class CScopeBinaryStreamContainerLengthLimit;
@@ -793,11 +818,6 @@ namespace NMib::NStream
 			return EEndian_Little;
 		}
 
-		constexpr mint f_ContainerLengthLimit() const
-		{
-			return 1 * 1024 * 1024; // This is for streams that don't have a length
-		}
-
 		constexpr void f_FeedFromStream(CBinaryStream &_Stream, CFilePos _nBytes)
 		{
 			uint8 Temp[1024];
@@ -1039,6 +1059,8 @@ namespace NMib::NStream
 		return _Len;
 	}
 
+	void fg_ReportLengthLimitError(uint64 _Len, uint64 _LengthLimit);
+
 	template <typename tf_CStream, typename tf_CLen>
 	void fg_CheckLengthLimit(tf_CStream &_Stream, tf_CLen const &_Len)
 	{
@@ -1047,7 +1069,7 @@ namespace NMib::NStream
 			LengthLimit = _Stream.f_ContainerLengthLimit();
 
 		if (_Len > uint64(LengthLimit))
-			DMibErrorStream("Container length would cause stream to overrun");
+			fg_ReportLengthLimitError(_Len, LengthLimit);
 	}
 
 	template <typename t_CStream>
