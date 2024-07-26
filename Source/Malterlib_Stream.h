@@ -317,6 +317,24 @@ namespace NMib::NStream
 		}
 	};
 
+	template <EStreamDirection tf_StreamDirection, typename tf_CStream>
+	decltype(auto) fg_StreamDirection(tf_CStream &_Stream)
+	{
+		return reinterpret_cast<TCStreamDirection<tf_CStream, tf_StreamDirection> &>(_Stream);
+	}
+
+	template <typename tf_CStream>
+	decltype(auto) fg_FeedStream(tf_CStream &_Stream)
+	{
+		return fg_StreamDirection<EStreamDirection_Feed>(_Stream);
+	}
+
+	template <typename tf_CStream>
+	decltype(auto) fg_ConsumeStream(tf_CStream &_Stream)
+	{
+		return fg_StreamDirection<EStreamDirection_Consume>(_Stream);
+	}
+
 	template <typename t_CStream, typename t_CData>
 	class TCBinaryStreamTypeReference
 	{
