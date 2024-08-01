@@ -836,19 +836,28 @@ namespace NMib::NStream
 			return EEndian_Little;
 		}
 
-		constexpr void f_FeedFromStream(CBinaryStream &_Stream, CFilePos _nBytes)
+		constexpr inline_small void f_FeedFromStream(CBinaryStream &_Stream, CFilePos _nBytes)
 		{
-			uint8 Temp[1024];
-			CFilePos ToTransfer = _nBytes;
-			while (ToTransfer)
+			if_consteval
 			{
-				mint ThisTime = fg_Min(ToTransfer, 1024);
-				_Stream.f_ConsumeBytes(Temp, ThisTime);
-				fp_FeedBytes(Temp, ThisTime);
-				ToTransfer -= ThisTime;
+				uint8 Temp[1024];
+				CFilePos ToTransfer = _nBytes;
+				while (ToTransfer)
+				{
+					mint ThisTime = fg_Min(ToTransfer, 1024);
+					_Stream.f_ConsumeBytes(Temp, ThisTime);
+					fp_FeedBytes(Temp, ThisTime);
+					ToTransfer -= ThisTime;
+				}
+			}
+			else
+			{
+				fp_FeedFromStreamImplementation(_Stream, _nBytes);
 			}
 		}
 
+	private:
+		void fp_FeedFromStreamImplementation(CBinaryStream &_Stream, CFilePos _nBytes);
 	};
 
 	class CBinaryStreamDefaultRef : public CBinaryStreamDefault
