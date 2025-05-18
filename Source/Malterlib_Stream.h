@@ -44,15 +44,15 @@ namespace NMib::NStream
 	template <typename t_CType>
 	concept cIsValidStreamVersion =
 		(
-			NTraits::TCIsEnum<t_CType>::mc_Value
+			NTraits::cIsEnum<t_CType>
 			&& (sizeof(NTraits::TCEnumUnderlyingType<t_CType>) <= sizeof(uint32))
-			&& !NTraits::TCIsSigned<NTraits::TCEnumUnderlyingType<t_CType>>::mc_Value
+			&& !NTraits::cIsSigned<NTraits::TCEnumUnderlyingType<t_CType>>
 		)
 		||
 		(
-			NTraits::TCIsInteger<t_CType>::mc_Value
+			NTraits::cIsInteger<t_CType>
 			&& (sizeof(t_CType) <= sizeof(uint32))
-			&& !NTraits::TCIsSigned<t_CType>::mc_Value
+			&& !NTraits::cIsSigned<t_CType>
 		)
 	;
 
@@ -96,11 +96,26 @@ namespace NMib::NStream
 		template <typename tf_CData> constexpr inline_small _Class &operator % (tf_CData &&_Data) { this->f_Stream(fg_Forward<tf_CData>(_Data)); return *this; }
 
 #	define DMibStreamImplementOperators(_Class) \
-		template <typename tf_CData> constexpr inline_small auto f_Feed(tf_CData &&_Data){return NMib::NStream::TCBinaryStreamTypeReference<_Class, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Feed(*this, NMib::fg_Forward<tf_CData>(_Data));} \
-		template <typename tf_CData> constexpr inline_small auto f_Feed(const tf_CData *_pData){return NMib::NStream::TCBinaryStreamTypePtr<_Class, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Feed(*this, _pData);} \
-		template <typename tf_CData> constexpr inline_small auto f_Consume(tf_CData &&_Data){return NMib::NStream::TCBinaryStreamTypeReference<_Class, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Consume(*this, NMib::fg_Forward<tf_CData>(_Data));} \
-		template <typename tf_CData> constexpr inline_small auto f_Consume(tf_CData *_pData){return NMib::NStream::TCBinaryStreamTypePtr<_Class, tf_CData>::fs_Consume(*this, _pData);} \
-		template <typename tf_CData> constexpr inline_small auto f_Stream(tf_CData &&_Data){return NMib::NStream::TCBinaryStreamTypeReferenceStream<_Class, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Stream(*this, NMib::fg_Forward<tf_CData>(_Data));} \
+		template <typename tf_CData> constexpr inline_small auto f_Feed(tf_CData &&_Data) \
+		{ \
+			return NMib::NStream::TCBinaryStreamTypeReference<_Class, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Feed(*this, NMib::fg_Forward<tf_CData>(_Data)); \
+		} \
+		template <typename tf_CData> constexpr inline_small auto f_Feed(const tf_CData *_pData) \
+		{ \
+			return NMib::NStream::TCBinaryStreamTypePtr<_Class, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Feed(*this, _pData); \
+		} \
+		template <typename tf_CData> constexpr inline_small auto f_Consume(tf_CData &&_Data) \
+		{ \
+			return NMib::NStream::TCBinaryStreamTypeReference<_Class, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Consume(*this, NMib::fg_Forward<tf_CData>(_Data)); \
+		} \
+		template <typename tf_CData> constexpr inline_small auto f_Consume(tf_CData *_pData) \
+		{ \
+			return NMib::NStream::TCBinaryStreamTypePtr<_Class, tf_CData>::fs_Consume(*this, _pData); \
+		} \
+		template <typename tf_CData> constexpr inline_small auto f_Stream(tf_CData &&_Data) \
+		{ \
+			return NMib::NStream::TCBinaryStreamTypeReferenceStream<_Class, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Stream(*this, NMib::fg_Forward<tf_CData>(_Data)); \
+		} \
 		template <typename tf_CData> constexpr inline_small NMib::NStream::CScopeBinaryStreamVersion f_StreamVersion(tf_CData &&_DefaultVersion) \
 		{ \
 			auto Version = _DefaultVersion; \
@@ -115,17 +130,17 @@ namespace NMib::NStream
 		template <typename tf_CData>
 		constexpr inline_small auto f_Feed(tf_CData &&_Data)
 		{
-			return TCBinaryStreamTypeReference<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Feed(*this, NMib::fg_Forward<tf_CData>(_Data));
+			return TCBinaryStreamTypeReference<t_CStream, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Feed(*this, NMib::fg_Forward<tf_CData>(_Data));
 		}
 		template <typename tf_CData>
 		constexpr inline_small auto f_Feed(const tf_CData *_pData)
 		{
-			return TCBinaryStreamTypePtr<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Feed(*this, _pData);
+			return TCBinaryStreamTypePtr<t_CStream, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Feed(*this, _pData);
 		}
 		template <typename tf_CData>
 		constexpr inline_small auto f_Consume(tf_CData &&_Data)
 		{
-			return TCBinaryStreamTypeReference<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Consume(*this, NMib::fg_Forward<tf_CData>(_Data));
+			return TCBinaryStreamTypeReference<t_CStream, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Consume(*this, NMib::fg_Forward<tf_CData>(_Data));
 		}
 		template <typename tf_CData>
 		constexpr inline_small auto f_Consume(tf_CData *_pData)
@@ -135,7 +150,7 @@ namespace NMib::NStream
 		template <typename tf_CData>
 		constexpr inline_small auto f_Stream(tf_CData &&_Data)
 		{
-			return TCBinaryStreamTypeReferenceStream<t_CStream, typename NMib::NTraits::TCRemoveQualifiers<typename NMib::NTraits::TCRemoveReference<tf_CData>::CType>::CType>::fs_Stream(*this, NMib::fg_Forward<tf_CData>(_Data));
+			return TCBinaryStreamTypeReferenceStream<t_CStream, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Stream(*this, NMib::fg_Forward<tf_CData>(_Data));
 		}
 		template <typename tf_CData>
 		constexpr inline_small CScopeBinaryStreamVersion f_StreamVersion(tf_CData &&_DefaultVersion)
@@ -187,12 +202,12 @@ namespace NMib::NStream
 		<
 			t_CStream
 			, t_CData
-			, TCEnableIfType
+			, TCEnableIf
 			<
-				!NTraits::TCIsSame
+				!NTraits::cIsSame
 				<
-					decltype(fg_GetReference<typename NTraits::TCRemoveReferenceAndQualifiers<t_CData>::CType>().f_Stream(fg_GetReference<t_CStream>())), NPrivate::CDummy
-				>::mc_Value
+					decltype(fg_GetReference<NTraits::TCRemoveReferenceAndQualifiers<t_CData>>().f_Stream(fg_GetReference<t_CStream>())), NPrivate::CDummy
+				>
 			>
 		>
 		{
@@ -210,12 +225,12 @@ namespace NMib::NStream
 		<
 			t_CStream
 			, t_CData
-			, TCEnableIfType
+			, TCEnableIf
 			<
-				!NTraits::TCIsSame
+				!NTraits::cIsSame
 				<
 					decltype(fg_GetReference<t_CStream>().f_Stream(fg_GetType<t_CData>())), NPrivate::CDummy
-				>::mc_Value
+				>
 			>
 		>
 		{
@@ -234,12 +249,12 @@ namespace NMib::NStream
 		<
 			t_CStream
 			, t_CData
-			, TCEnableIfType
+			, TCEnableIf
 			<
-				!NTraits::TCIsSame
+				!NTraits::cIsSame
 				<
 					decltype(fg_GetReference<t_CStream>().f_Feed(fg_GetType<t_CData>())), NPrivate::CDummy
-				>::mc_Value
+				>
 			>
 		>
 		{
@@ -257,12 +272,12 @@ namespace NMib::NStream
 		<
 			t_CStream
 			, t_CData
-			, TCEnableIfType
+			, TCEnableIf
 			<
-				!NTraits::TCIsSame
+				!NTraits::cIsSame
 				<
 					decltype(fg_GetReference<t_CStream>().f_Consume(fg_GetType<t_CData>())), NPrivate::CDummy
-				>::mc_Value
+				>
 			>
 		>
 		{
@@ -280,7 +295,7 @@ namespace NMib::NStream
 		<
 			EStreamDirection t_Direction
 			, typename tf_CData
-			, typename NMib::TCEnableIfType
+			, NMib::TCEnableIf
 			<
 				NPrivate::TCHasStream<TCStreamDirection<t_CStream, t_Direction>, tf_CData>::mc_Value
 			> * = nullptr
@@ -293,7 +308,7 @@ namespace NMib::NStream
 		template
 		<
 			typename tf_CData
-			, typename NMib::TCEnableIfType
+			, NMib::TCEnableIf
 			<
 				!NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Feed>, tf_CData>::mc_Value
 			> * = nullptr
@@ -306,14 +321,14 @@ namespace NMib::NStream
 		template
 		<
 			typename tf_CData
-			, typename NMib::TCEnableIfType
+			, NMib::TCEnableIf
 			<
 				!NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Consume>, tf_CData>::mc_Value
 			> * = nullptr
 		>
 		inline_small static auto fs_Stream(TCStreamDirection<t_CStream, EStreamDirection_Consume> &_Stream, tf_CData &&_Data)
 		{
-			static_cast<t_CStream &>(_Stream) >> const_cast<typename NTraits::TCRemoveReferenceAndQualifiers<tf_CData>::CType &>(_Data);
+			static_cast<t_CStream &>(_Stream) >> const_cast<NTraits::TCRemoveReferenceAndQualifiers<tf_CData> &>(_Data);
 		}
 	};
 
@@ -344,9 +359,9 @@ namespace NMib::NStream
 		template
 		<
 			typename tf_CData
-			, typename NMib::TCEnableIfType
+			, NMib::TCEnableIf
 			<
-				!NMib::NTraits::TCIsEnum<typename NTraits::TCRemoveReference<tf_CData>::CType>::mc_Value
+				!NMib::NTraits::cIsEnum<NTraits::TCRemoveReference<tf_CData>>
 				&& !NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Feed>, tf_CData>::mc_Value
 			> * = nullptr
 		>
@@ -358,15 +373,15 @@ namespace NMib::NStream
 		template
 		<
 			typename tf_CData
-			, typename NMib::TCEnableIfType
+			, NMib::TCEnableIf
 			<
-				!NMib::NTraits::TCIsEnum<typename NTraits::TCRemoveReference<tf_CData>::CType>::mc_Value
+				!NMib::NTraits::cIsEnum<NTraits::TCRemoveReference<tf_CData>>
 				&& NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Feed>, tf_CData>::mc_Value
 			> * = nullptr
 		>
 		constexpr inline_small static auto fs_Feed(t_CStream &_Stream, tf_CData &&_Data)
 		{
-			return const_cast<typename NTraits::TCRemoveReferenceAndQualifiers<tf_CData>::CType &>(_Data).f_Stream(reinterpret_cast<TCStreamDirection<t_CStream, EStreamDirection_Feed> &>(_Stream));
+			return const_cast<NTraits::TCRemoveReferenceAndQualifiers<tf_CData> &>(_Data).f_Stream(reinterpret_cast<TCStreamDirection<t_CStream, EStreamDirection_Feed> &>(_Stream));
 		}
 
 		// Consume
@@ -374,9 +389,9 @@ namespace NMib::NStream
 		template
 		<
 			typename tf_CData
-			, typename NMib::TCEnableIfType
+			, NMib::TCEnableIf
 			<
-				!NMib::NTraits::TCIsEnum<typename NTraits::TCRemoveReference<tf_CData>::CType>::mc_Value
+				!NMib::NTraits::cIsEnum<NTraits::TCRemoveReference<tf_CData>>
 				&& !NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Consume>, tf_CData>::mc_Value
 			> * = nullptr
 		>
@@ -388,9 +403,9 @@ namespace NMib::NStream
 		template
 		<
 			typename tf_CData
-			, typename NMib::TCEnableIfType
+			, NMib::TCEnableIf
 			<
-				!NMib::NTraits::TCIsEnum<typename NTraits::TCRemoveReference<tf_CData>::CType>::mc_Value
+				!NMib::NTraits::cIsEnum<NTraits::TCRemoveReference<tf_CData>>
 				&& NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Consume>, tf_CData>::mc_Value
 			> * = nullptr
 		>
@@ -399,7 +414,7 @@ namespace NMib::NStream
 			return fg_Forward<tf_CData>(_Data).f_Stream(reinterpret_cast<TCStreamDirection<t_CStream, EStreamDirection_Consume> &>(_Stream));
 		}
 
-		template <typename tf_CData, typename NMib::TCEnableIf<NMib::NTraits::TCIsEnum<tf_CData>::mc_Value, void>::CType * = nullptr>
+		template <typename tf_CData, NMib::TCEnableIf<NMib::NTraits::cIsEnum<tf_CData>, void> * = nullptr>
 		constexpr inline_small static void fs_Feed(t_CStream &_Stream, tf_CData const &_Data)
 		{
 			if constexpr (NTraits::cIsScopedEnum<tf_CData>)
@@ -408,7 +423,7 @@ namespace NMib::NStream
 				_Stream << uint32(_Data);
 		}
 
-		template <typename tf_CData, typename NMib::TCEnableIf<NMib::NTraits::TCIsEnum<tf_CData>::mc_Value, void>::CType * = nullptr>
+		template <typename tf_CData, NMib::TCEnableIf<NMib::NTraits::cIsEnum<tf_CData>, void> * = nullptr>
 		constexpr inline_small static void fs_Consume(t_CStream &_Stream, tf_CData &_Data)
 		{
 			if constexpr (NTraits::cIsScopedEnum<tf_CData>)
@@ -1285,7 +1300,7 @@ namespace NMib::NStream
 				_Stream.f_FeedBytes(&_Data, sizeof(_Data));\
 			else\
 			{\
-				auto Temp = fg_ByteSwap(reinterpret_cast<typename NTraits::TCIntFromSize<sizeof(_Data)>::CType const &>(_Data));\
+				auto Temp = fg_ByteSwap(reinterpret_cast<NTraits::TCIntFromSize<sizeof(_Data)> const &>(_Data));\
 				_Stream.f_FeedBytes(&Temp, sizeof(_Data));\
 			} \
 		}\
@@ -1296,7 +1311,7 @@ namespace NMib::NStream
 				_Stream.f_ConsumeBytes(&_Data, sizeof(_Data));\
 			else\
 			{\
-				typename NTraits::TCIntFromSize<sizeof(_Data)>::CType Data;\
+				NTraits::TCIntFromSize<sizeof(_Data)> Data;\
 				_Stream.f_ConsumeBytes(&Data, sizeof(Data));\
 				_Data = fg_ByteSwap(reinterpret_cast<_Type &>(Data));\
 			}\
