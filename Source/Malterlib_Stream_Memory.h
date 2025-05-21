@@ -13,7 +13,7 @@ namespace NMib::NStream
 		CBinaryStreamMemory &operator = (CBinaryStreamMemory const &) = delete;
 
 	public:
-		typedef t_CVector CStorage;
+		using CStorage = t_CVector;
 
 	protected:
 		mint m_Position;
@@ -315,7 +315,7 @@ namespace NMib::NStream
 		CBinaryStreamMemoryRef &operator = (CBinaryStreamMemoryRef const &) = delete;
 
 	public:
-		typedef t_CVector CStorage;
+		using CStorage = t_CVector;
 
 	protected:
 		mint m_Position;
@@ -543,7 +543,7 @@ namespace NMib::NStream
 		CBinaryStreamMemoryConstRef &operator = (CBinaryStreamMemoryConstRef const &) = delete;
 
 	public:
-		typedef t_CVector CStorage;
+		using CStorage = t_CVector;
 
 	protected:
 		mint m_Position;

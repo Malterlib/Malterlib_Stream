@@ -24,7 +24,7 @@ namespace NMib::NStream
 #		define DErrorStreamVersionMismatch(_Description) DMibErrorStreamVersionMismatch(_Description)
 #	endif
 
-	typedef CMibFilePos CFilePos;
+	using CFilePos = CMibFilePos;
 
 	enum EStreamDirection
 	{
@@ -465,7 +465,8 @@ namespace NMib::NStream
 		{
 		}
 	public:
-		typedef t_CType CType;
+		using CType = t_CType;
+
 		CType &m_Data;
 		TCBinaryStreamUnsafeWrapper(t_CType &_Data)
 			:m_Data(_Data)
