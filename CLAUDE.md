@@ -238,7 +238,7 @@ Stream >> LargeVector;							// Throws if too large
 ### Running Module Tests
 ```bash
 # Build tests
-MalterlibBuildShowProgress=false ./mib build Tests macOS arm64 Debug
+MalterlibBuildShowProgress=false ./mib build Tests
 
 # Run all stream tests
 /opt/Deploy/Tests/RunAllTests --paths '["Malterlib/Stream/*"]'
