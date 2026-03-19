@@ -19,14 +19,14 @@ namespace
 			{
 				CBinaryStreamMemory<> Stream;
 
-				Stream << fg_GetUnsafeStreamWrapper((mint)1) << "ouoeuaoaa   eeee e" << CStr("Oeuoeuoeu");
+				Stream << fg_GetUnsafeStreamWrapper((umint)1) << "ouoeuaoaa   eeee e" << CStr("Oeuoeuoeu");
 
 				Stream.f_SetPosition(0);
-				mint Test2;
+				umint Test2;
 				ch8 pTest2[200];
 				CStr String;
 				Stream >> fg_GetUnsafeStreamWrapper(Test2) >> pTest2 >> String;
-				DMibTest(DMibExpr(Test2) == DMibExpr(mint(1)));
+				DMibTest(DMibExpr(Test2) == DMibExpr(umint(1)));
 				DMibTest(DMibExpr(pTest2) == DMibExpr(CStr("ouoeuaoaa   eeee e")));
 				DMibTest(DMibExpr(String) == DMibExpr(CStr("Oeuoeuoeu")));
 
@@ -46,7 +46,7 @@ namespace
 				uint64 Value4 = 3;
 				CStr Value5 = "Testing";
 				CStr Value6;
-				for (mint i = 0; i < 22728937; ++i)
+				for (umint i = 0; i < 22728937; ++i)
 					Value6 += "T";
 				{
 

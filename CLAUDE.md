@@ -125,9 +125,9 @@ template <typename t_CStreamType = CBinaryStreamDefault,
 		  typename t_CVector = CByteVector>
 class CBinaryStreamMemory : public t_CStreamType
 {
-	mint m_Position;				// Current position
-	mint m_Length;					// Valid data length
-	mint m_BufferSize;				// Allocated size
+	umint m_Position;				// Current position
+	umint m_Length;					// Valid data length
+	umint m_BufferSize;				// Allocated size
 	uint8 *m_pBuffer;				// Direct buffer pointer
 	t_CVector m_Buffer;				// Underlying storage
 };
@@ -299,7 +299,7 @@ MalterlibBuildShowProgress=false ./mib build Tests
 - Length limit violations throw immediately
 
 ### Stream Position Management
-- Position tracking in mint (platform-specific integer)
+- Position tracking in umint (platform-specific integer)
 - Supports seek operations (absolute, relative, from-end)
 - Position validation for read operations
 - Automatic position updates during streaming
@@ -325,7 +325,7 @@ MalterlibBuildShowProgress=false ./mib build Tests
 - Concept constraints for compile-time safety
 
 ### Known Limitations
-- Memory streams limited to mint size (platform-dependent)
+- Memory streams limited to umint size (platform-dependent)
 - No built-in compression (use Compression module)
 - No automatic encryption (use Cryptography module)
 - Version must fit in uint32

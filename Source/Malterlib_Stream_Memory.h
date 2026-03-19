@@ -16,14 +16,14 @@ namespace NMib::NStream
 		using CStorage = t_CVector;
 
 	protected:
-		mint m_Position;
-		mint m_Length;
-		mint m_BufferSize;
+		umint m_Position;
+		umint m_Length;
+		umint m_BufferSize;
 		uint8 *m_pBuffer;
 
 		CStorage m_Buffer;
 
-		inline_never void fp_GrowBufferGrow(mint _NeededBytes)
+		inline_never void fp_GrowBufferGrow(umint _NeededBytes)
 		{
 			if (m_BufferSize == 0 && _NeededBytes < 2048)
 				_NeededBytes = 2048;
@@ -32,18 +32,18 @@ namespace NMib::NStream
 			m_BufferSize = m_Buffer.f_GetLen();
 		}
 
-		inline_small void fp_GrowBuffer(mint _NeededBytes)
+		inline_small void fp_GrowBuffer(umint _NeededBytes)
 		{
-			mint CurrentLen = m_BufferSize;
-			mint NeededSize = _NeededBytes + m_Position;
+			umint CurrentLen = m_BufferSize;
+			umint NeededSize = _NeededBytes + m_Position;
 			if (CurrentLen < NeededSize)
 				fp_GrowBufferGrow(NeededSize);
 		}
 
 		void fp_SetPositionInternal(CFilePos _Pos)
 		{
-			if (_Pos < 0 || fg_SafeLargerThan(_Pos, mint(TCLimitsInt<mint>::mc_Max)))
-				DMibError("Memory stream positions are limited to 0 -> TCLimitsInt<mint>::mc_Max");
+			if (_Pos < 0 || fg_SafeLargerThan(_Pos, umint(TCLimitsInt<umint>::mc_Max)))
+				DMibError("Memory stream positions are limited to 0 -> TCLimitsInt<umint>::mc_Max");
 
 			m_Position = _Pos;
 		}
@@ -61,7 +61,7 @@ namespace NMib::NStream
 			return m_pBuffer;
 		}
 
-		void f_GrowBuffer(mint _nBytes)
+		void f_GrowBuffer(umint _nBytes)
 		{
 			fp_GrowBuffer(_nBytes);
 		}
@@ -201,7 +201,7 @@ namespace NMib::NStream
 			m_Buffer.f_Clear();
 		}
 
-		void f_RemoveData(mint _Pos, mint _Len)
+		void f_RemoveData(umint _Pos, umint _Len)
 		{
 			m_Buffer.f_Remove(_Pos, _Len);
 			m_pBuffer = m_Buffer.f_GetArray();
@@ -212,11 +212,11 @@ namespace NMib::NStream
 				m_Position = _Pos;
 		}
 
-		void f_FeedBytes(const void *_pMem, mint _nBytes)
+		void f_FeedBytes(const void *_pMem, umint _nBytes)
 		{
-			mint CurrentLen = m_BufferSize;
-			mint Position = m_Position;
-			mint NeededSize = _nBytes + Position;
+			umint CurrentLen = m_BufferSize;
+			umint Position = m_Position;
+			umint NeededSize = _nBytes + Position;
 
 			if (CurrentLen < NeededSize)
 				fp_GrowBufferGrow(NeededSize);
@@ -232,7 +232,7 @@ namespace NMib::NStream
 			m_Position = Position;
 		}
 
-		void f_ConsumeBytes(void *_pMem, mint _nBytes)
+		void f_ConsumeBytes(void *_pMem, umint _nBytes)
 		{
 			if (m_Length < (m_Position + _nBytes)) [[unlikely]]
 				this->fp_ThrowEndOfStreamException();
@@ -282,7 +282,7 @@ namespace NMib::NStream
 		{
 		}
 
-		void f_SetCacheSize(mint _CacheSize)
+		void f_SetCacheSize(umint _CacheSize)
 		{
 		}
 
@@ -291,7 +291,7 @@ namespace NMib::NStream
 			return m_Length;
 		}
 
-		mint f_ContainerLengthLimit() const
+		umint f_ContainerLengthLimit() const
 		{
 			return f_GetLength() - f_GetPosition();
 		}
@@ -318,15 +318,15 @@ namespace NMib::NStream
 		using CStorage = t_CVector;
 
 	protected:
-		mint m_Position;
-		mint m_Length;
+		umint m_Position;
+		umint m_Length;
 
 		CStorage &m_Buffer;
 
-		void fp_GrowBuffer(mint _NeededBytes)
+		void fp_GrowBuffer(umint _NeededBytes)
 		{
-			mint CurrentLen = m_Buffer.f_GetLen();
-			mint NeededSize = _NeededBytes + m_Position;
+			umint CurrentLen = m_Buffer.f_GetLen();
+			umint NeededSize = _NeededBytes + m_Position;
 			if (CurrentLen < NeededSize)
 			{
 				m_Buffer.f_Grow(NeededSize);
@@ -335,8 +335,8 @@ namespace NMib::NStream
 
 		void fp_SetPositionInternal(CFilePos _Pos)
 		{
-			if ((_Pos < 0) || fg_SafeLargerThan(_Pos, TCLimitsInt<mint>::mc_Max))
-				DMibError("Memory stream positions are limited to 0 -> TCLimitsInt<mint>::mc_Max");
+			if ((_Pos < 0) || fg_SafeLargerThan(_Pos, TCLimitsInt<umint>::mc_Max))
+				DMibError("Memory stream positions are limited to 0 -> TCLimitsInt<umint>::mc_Max");
 
 //				if (_Pos > (CFilePos)m_Length)
 //					DMibError("Position is past end of stream");
@@ -407,7 +407,7 @@ namespace NMib::NStream
 			m_Length = _Buffer.f_GetLen();
 		}
 
-		CBinaryStreamMemoryRef(CStorage &_Buffer, mint _Length)
+		CBinaryStreamMemoryRef(CStorage &_Buffer, umint _Length)
 			: m_Buffer(_Buffer)
 		{
 			m_Position = 0;
@@ -438,7 +438,7 @@ namespace NMib::NStream
 			m_Buffer.f_Clear();
 		}
 
-		void f_RemoveData(mint _Pos, mint _Len)
+		void f_RemoveData(umint _Pos, umint _Len)
 		{
 			m_Buffer.f_Remove(_Pos, _Len);
 			m_Length -= _Len;
@@ -446,7 +446,7 @@ namespace NMib::NStream
 				m_Position = _Pos;
 		}
 
-		void f_FeedBytes(const void *_pMem, mint _nBytes)
+		void f_FeedBytes(const void *_pMem, umint _nBytes)
 		{
 			fp_GrowBuffer(_nBytes);
 
@@ -459,7 +459,7 @@ namespace NMib::NStream
 
 		}
 
-		void f_ConsumeBytes(void *_pMem, mint _nBytes)
+		void f_ConsumeBytes(void *_pMem, umint _nBytes)
 		{
 			if (m_Length < (m_Position + _nBytes)) [[unlikely]]
 				this->fp_ThrowEndOfStreamException();
@@ -509,7 +509,7 @@ namespace NMib::NStream
 		{
 		}
 
-		void f_SetCacheSize(mint _CacheSize)
+		void f_SetCacheSize(umint _CacheSize)
 		{
 		}
 
@@ -518,7 +518,7 @@ namespace NMib::NStream
 			return m_Length;
 		}
 
-		mint f_ContainerLengthLimit() const
+		umint f_ContainerLengthLimit() const
 		{
 			return f_GetLength() - f_GetPosition();
 		}
@@ -546,15 +546,15 @@ namespace NMib::NStream
 		using CStorage = t_CVector;
 
 	protected:
-		mint m_Position;
-		mint m_Length;
+		umint m_Position;
+		umint m_Length;
 
 		CStorage const &m_Buffer;
 
 		void fp_SetPositionInternal(CFilePos _Pos)
 		{
-			if ((_Pos < 0) || fg_SafeLargerThan(_Pos, TCLimitsInt<mint>::mc_Max))
-				DMibError("Memory stream positions are limited to 0 -> TCLimitsInt<mint>::mc_Max");
+			if ((_Pos < 0) || fg_SafeLargerThan(_Pos, TCLimitsInt<umint>::mc_Max))
+				DMibError("Memory stream positions are limited to 0 -> TCLimitsInt<umint>::mc_Max");
 
 			if (_Pos > (CFilePos)m_Length)
 				DMibError("Position is past end of stream");
@@ -607,7 +607,7 @@ namespace NMib::NStream
 			DMibError("Const stream cannot be cleared");
 		}
 
-		void f_RemoveData(mint _Pos, mint _Len)
+		void f_RemoveData(umint _Pos, umint _Len)
 		{
 			m_Buffer.f_Remove(_Pos, _Len);
 			m_Length -= _Len;
@@ -615,12 +615,12 @@ namespace NMib::NStream
 				m_Position = _Pos;
 		}
 
-		void f_FeedBytes(const void *_pMem, mint _nBytes)
+		void f_FeedBytes(const void *_pMem, umint _nBytes)
 		{
 			DMibError("Const stream cannot be written to");
 		}
 
-		void f_ConsumeBytes(void *_pMem, mint _nBytes)
+		void f_ConsumeBytes(void *_pMem, umint _nBytes)
 		{
 			if (m_Length < (m_Position + _nBytes)) [[unlikely]]
 				this->fp_ThrowEndOfStreamException();;
@@ -670,7 +670,7 @@ namespace NMib::NStream
 		{
 		}
 
-		void f_SetCacheSize(mint _CacheSize)
+		void f_SetCacheSize(umint _CacheSize)
 		{
 		}
 
@@ -679,7 +679,7 @@ namespace NMib::NStream
 			return m_Length;
 		}
 
-		mint f_ContainerLengthLimit() const
+		umint f_ContainerLengthLimit() const
 		{
 			return f_GetLength() - f_GetPosition();
 		}
@@ -699,17 +699,17 @@ namespace NMib::NStream
 		CBinaryStreamMemoryPtr &operator = (CBinaryStreamMemoryPtr const &) = delete;
 
 	protected:
-		mint m_Position;
-		mint m_Length;
-		mint m_MaxLength;
+		umint m_Position;
+		umint m_Length;
+		umint m_MaxLength;
 		aint m_Mode;
 		uint8* m_pMemoryData;
 
 
 		void fp_SetPositionInternal(CFilePos _Pos)
 		{
-			if (_Pos < 0 || fg_SafeLargerThan(_Pos, mint(TCLimitsInt<mint>::mc_Max)))
-				DMibError("Memory stream positions are limited to 0 -> TCLimitsInt<mint>::mc_Max");
+			if (_Pos < 0 || fg_SafeLargerThan(_Pos, umint(TCLimitsInt<umint>::mc_Max)))
+				DMibError("Memory stream positions are limited to 0 -> TCLimitsInt<umint>::mc_Max");
 
 			if (_Pos > (CFilePos)m_Length)
 				DMibError("Position is past end of stream");
@@ -728,7 +728,7 @@ namespace NMib::NStream
 			m_Length = 0;
 		}
 
-		void f_OpenRead(const void *_pData, mint _Length)
+		void f_OpenRead(const void *_pData, umint _Length)
 		{
 			m_pMemoryData = (uint8 *)_pData;
 			m_Length = _Length;
@@ -743,7 +743,7 @@ namespace NMib::NStream
 			m_MaxLength = 0; // We can write no bytes
 		}
 
-		void f_OpenReadWrite(void *_pData, mint _MaxLength, mint _Length = 0)
+		void f_OpenReadWrite(void *_pData, umint _MaxLength, umint _Length = 0)
 		{
 			m_pMemoryData = (uint8 *)_pData;
 			m_Length = _Length;
@@ -751,14 +751,14 @@ namespace NMib::NStream
 		}
 
 		template <typename tf_CVector>
-		void f_OpenReadWrite(tf_CVector &_Vector, mint _Length = 0)
+		void f_OpenReadWrite(tf_CVector &_Vector, umint _Length = 0)
 		{
 			m_pMemoryData = (uint8 *)_Vector.f_GetArray();
 			m_Length = _Length;
 			m_MaxLength = _Vector.f_GetLen();
 		}
 
-		void f_FeedBytes(const void *_pMem, mint _nBytes)
+		void f_FeedBytes(const void *_pMem, umint _nBytes)
 		{
 			if (m_MaxLength < (m_Position + _nBytes)) [[unlikely]]
 				this->fp_ThrowEndOfStreamException();;
@@ -771,7 +771,7 @@ namespace NMib::NStream
 				m_Length = m_Position;
 		}
 
-		void f_ConsumeBytes(void *_pMem, mint _nBytes)
+		void f_ConsumeBytes(void *_pMem, umint _nBytes)
 		{
 			if (m_Length < (m_Position + _nBytes)) [[unlikely]]
 				this->fp_ThrowEndOfStreamException();;
@@ -821,7 +821,7 @@ namespace NMib::NStream
 		{
 		}
 
-		void f_SetCacheSize(mint _CacheSize)
+		void f_SetCacheSize(umint _CacheSize)
 		{
 		}
 
@@ -830,7 +830,7 @@ namespace NMib::NStream
 			return m_Length;
 		}
 
-		mint f_ContainerLengthLimit() const
+		umint f_ContainerLengthLimit() const
 		{
 			return f_GetLength() - f_GetPosition();
 		}
@@ -863,15 +863,15 @@ namespace NMib::NStream
 		CBinaryStreamConstMemoryPtr &operator = (CBinaryStreamConstMemoryPtr const &) = delete;
 
 	protected:
-		mint m_Position;
-		mint m_Length;
+		umint m_Position;
+		umint m_Length;
 		uint8 const* m_pMemoryData;
 
 
 		void fp_SetPositionInternal(CFilePos _Pos)
 		{
-			if (_Pos < 0 || fg_SafeLargerThan(_Pos, mint(TCLimitsInt<mint>::mc_Max)))
-				DMibError("Memory stream positions are limited to 0 -> TCLimitsInt<mint>::mc_Max");
+			if (_Pos < 0 || fg_SafeLargerThan(_Pos, umint(TCLimitsInt<umint>::mc_Max)))
+				DMibError("Memory stream positions are limited to 0 -> TCLimitsInt<umint>::mc_Max");
 
 			if (_Pos > (CFilePos)m_Length)
 				DMibError("Position is past end of stream");
@@ -911,7 +911,7 @@ namespace NMib::NStream
 			_ToMove.m_pMemoryData = nullptr;
 		}
 
-		void f_OpenRead(const void *_pData, mint _Length)
+		void f_OpenRead(const void *_pData, umint _Length)
 		{
 			m_pMemoryData = (uint8 *)_pData;
 			m_Length = _Length;
@@ -926,12 +926,12 @@ namespace NMib::NStream
 			m_Position = 0;
 		}
 
-		void f_FeedBytes(const void *_pMem, mint _nBytes)
+		void f_FeedBytes(const void *_pMem, umint _nBytes)
 		{
 			DMibError("Const stream cannot be written to");
 		}
 
-		void f_ConsumeBytes(void *_pMem, mint _nBytes)
+		void f_ConsumeBytes(void *_pMem, umint _nBytes)
 		{
 			if (m_Length < (m_Position + _nBytes)) [[unlikely]]
 				this->fp_ThrowEndOfStreamException();;
@@ -981,7 +981,7 @@ namespace NMib::NStream
 		{
 		}
 
-		void f_SetCacheSize(mint _CacheSize)
+		void f_SetCacheSize(umint _CacheSize)
 		{
 		}
 
@@ -990,7 +990,7 @@ namespace NMib::NStream
 			return m_Length;
 		}
 
-		mint f_ContainerLengthLimit() const
+		umint f_ContainerLengthLimit() const
 		{
 			return f_GetLength() - f_GetPosition();
 		}
@@ -1046,7 +1046,7 @@ namespace NMib::NStream
 			m_pSubStream->f_SetPosition(m_SubPos);
 		}
 
-		void f_FeedBytes(const void *_pMem, mint _nBytes)
+		void f_FeedBytes(const void *_pMem, umint _nBytes)
 		{
 			if (m_MaxLength >= 0)
 			{
@@ -1060,7 +1060,7 @@ namespace NMib::NStream
 			m_pSubStream->f_FeedBytes(_pMem, _nBytes);
 		}
 
-		void f_ConsumeBytes(void *_pMem, mint _nBytes)
+		void f_ConsumeBytes(void *_pMem, umint _nBytes)
 		{
 			if (m_MaxLength >= 0)
 			{
@@ -1164,7 +1164,7 @@ namespace NMib::NStream
 			m_pSubStream->f_Flush(_bLocalCacheOnly);
 		}
 
-		void f_SetCacheSize(mint _CacheSize)
+		void f_SetCacheSize(umint _CacheSize)
 		{
 			m_pSubStream->f_SetCacheSize(_CacheSize);
 		}
@@ -1177,7 +1177,7 @@ namespace NMib::NStream
 				return m_pSubStream->f_GetLength() - m_SubPos;
 		}
 
-		mint f_ContainerLengthLimit() const
+		umint f_ContainerLengthLimit() const
 		{
 			return NStream::fg_CapLengthLimit(f_GetLength() - f_GetPosition());
 		}
@@ -1219,7 +1219,7 @@ namespace NMib::NStream
 			m_pWriteToStream = _pWriteStream;
 		}
 
-		void f_FeedBytes(const void *_pMem, mint _nBytes)
+		void f_FeedBytes(const void *_pMem, umint _nBytes)
 		{
 			m_TempVector.f_SetAtLeastLen(_nBytes);
 
@@ -1235,7 +1235,7 @@ namespace NMib::NStream
 			m_pWriteToStream->f_FeedBytes(_pMem, _nBytes);
 		}
 
-		void f_ConsumeBytes(void *_pMem, mint _nBytes)
+		void f_ConsumeBytes(void *_pMem, umint _nBytes)
 		{
 			m_TempVector.f_SetAtLeastLen(_nBytes);
 
@@ -1302,7 +1302,7 @@ namespace NMib::NStream
 			m_pWriteToStream->f_Flush(_bLocalCacheOnly);
 		}
 
-		void f_SetCacheSize(mint _CacheSize)
+		void f_SetCacheSize(umint _CacheSize)
 		{
 			m_pWriteToStream->f_SetCacheSize(_CacheSize);
 		}
@@ -1312,7 +1312,7 @@ namespace NMib::NStream
 			return m_pWriteToStream->f_GetLength();
 		}
 
-		mint f_ContainerLengthLimit() const
+		umint f_ContainerLengthLimit() const
 		{
 			return m_pWriteToStream->f_ContainerLengthLimit();
 		}

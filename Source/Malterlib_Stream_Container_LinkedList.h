@@ -11,7 +11,7 @@ namespace NMib::NStream
 	public:
 		static constexpr void fs_Feed(t_CStream &_Stream, NContainer::TCLinkedList<t_CData, t_CAllocator> const &_Data)
 		{
-			mint nItems = _Data.f_GetLen();
+			umint nItems = _Data.f_GetLen();
 
 			fg_FeedLenToStream(_Stream, nItems);
 
@@ -21,7 +21,7 @@ namespace NMib::NStream
 
 		static constexpr void fs_Feed(t_CStream &_Stream, NContainer::TCLinkedList<t_CData, t_CAllocator> &&_Data)
 		{
-			mint nItems = _Data.f_GetLen();
+			umint nItems = _Data.f_GetLen();
 
 			fg_FeedLenToStream(_Stream, nItems);
 
@@ -35,7 +35,7 @@ namespace NMib::NStream
 			fg_ConsumeLenFromStream(_Stream, nItems);
 			fg_CheckLengthLimit(_Stream, nItems);
 
-			for (mint i = 0; i < nItems; ++i)
+			for (umint i = 0; i < nItems; ++i)
 				_Stream >> _Data.f_Insert();
 		}
 	};
