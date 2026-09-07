@@ -36,6 +36,27 @@ namespace
 				Stream >> fg_GetUnsafeStreamWrapper(Test2) >> String2 >> String;
 				DMibTest(DMibExpr(String2) == DMibExpr(CStr("ouoeuaoaa   eeee e")));
 			};
+			DMibTestSuite("Move Construct")
+			{
+				CByteVector Bytes;
+				for (umint i = 0; i < 1000; ++i)
+					Bytes.f_Insert(uint8(i));
+
+				CBinaryStreamMemory<> Stream(NMib::fg_Move(Bytes));
+				DMibExpect(Stream.f_GetLength(), ==, 1000);
+
+				for (umint i = 0; i < 1000; ++i)
+				{
+					uint8 Value = 0;
+					Stream >> fg_GetUnsafeStreamWrapper(Value);
+					if (Value != uint8(i))
+					{
+						DMibExpect(Value, ==, uint8(i));
+						break;
+					}
+				}
+				DMibExpect(Stream.f_GetPosition(), ==, 1000);
+			};
 			DMibTestSuite("Length Limit")
 			{
 				CBinaryStreamMemory<> OutStream;

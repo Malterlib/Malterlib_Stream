@@ -127,7 +127,7 @@ namespace NMib::NStream
 			: m_Buffer(fg_Move(_Buffer))
 		{
 			m_Position = 0;
-			m_Length = _Buffer.f_GetLen();
+			m_Length = m_Buffer.f_GetLen();
 			m_BufferSize = m_Length;
 			m_pBuffer = m_Buffer.f_GetArray();
 		}
