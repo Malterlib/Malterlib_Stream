@@ -14,7 +14,7 @@ namespace NMib::NStream
 
 	template <typename tf_CVersion>
 	constexpr CScopeBinaryStreamVersion::CScopeBinaryStreamVersion(CBinaryStream &_Stream, tf_CVersion _Version)
-		requires(cIsValidStreamVersion<tf_CVersion>)
+		requires (cIsValidStreamVersion<tf_CVersion>)
 		: CScopeBinaryStreamVersion(_Stream, uint32(_Version))
 	{
 	}
@@ -29,7 +29,7 @@ namespace NMib::NStream
 
 	template <typename tf_CVersion>
 	constexpr void CScopeBinaryStreamVersion::f_SetVersion(CBinaryStream &_Stream, tf_CVersion _Version)
-		requires(cIsValidStreamVersion<tf_CVersion>)
+		requires (cIsValidStreamVersion<tf_CVersion>)
 	{
 		f_SetVersion(_Stream, uint32(_Version));
 	}

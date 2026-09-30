@@ -48,6 +48,7 @@ namespace NMib::NStream
 			m_Position = _Pos;
 		}
 		DMibStreamImplementProtected(CBinaryStreamMemory);
+
 	public:
 		DMibStreamImplementOperators(CBinaryStreamMemory);
 
@@ -56,7 +57,7 @@ namespace NMib::NStream
 			return m_pBuffer;
 		}
 
-		const void *f_GetBufferConst() const
+		void const *f_GetBufferConst() const
 		{
 			return m_pBuffer;
 		}
@@ -114,7 +115,7 @@ namespace NMib::NStream
 			return fg_Move(m_Buffer);
 		}
 
-		CBinaryStreamMemory(CStorage const& _Buffer)
+		CBinaryStreamMemory(CStorage const &_Buffer)
 			: m_Buffer(_Buffer)
 		{
 			m_Position = 0;
@@ -123,7 +124,7 @@ namespace NMib::NStream
 			m_pBuffer = m_Buffer.f_GetArray();
 		}
 
-		CBinaryStreamMemory(CStorage && _Buffer)
+		CBinaryStreamMemory(CStorage &&_Buffer)
 			: m_Buffer(fg_Move(_Buffer))
 		{
 			m_Position = 0;
@@ -132,12 +133,12 @@ namespace NMib::NStream
 			m_pBuffer = m_Buffer.f_GetArray();
 		}
 
-		CBinaryStreamMemory(CBinaryStreamMemory && _ToMove)
-			: m_Buffer( fg_Move( _ToMove.m_Buffer ) )
-			, m_Position( _ToMove.m_Position )
-			, m_Length( _ToMove.m_Length )
-			, m_BufferSize( _ToMove.m_BufferSize )
-			, m_pBuffer( _ToMove.m_pBuffer )
+		CBinaryStreamMemory(CBinaryStreamMemory &&_ToMove)
+			: m_Buffer(fg_Move(_ToMove.m_Buffer))
+			, m_Position(_ToMove.m_Position)
+			, m_Length(_ToMove.m_Length)
+			, m_BufferSize(_ToMove.m_BufferSize)
+			, m_pBuffer(_ToMove.m_pBuffer)
 		{
 			_ToMove.m_Position = 0;
 			_ToMove.m_Length = 0;
@@ -145,9 +146,9 @@ namespace NMib::NStream
 			_ToMove.m_pBuffer = nullptr;
 		}
 
-		CBinaryStreamMemory& operator=(CBinaryStreamMemory && _ToMove)
+		CBinaryStreamMemory &operator = (CBinaryStreamMemory &&_ToMove)
 		{
-			m_Buffer = fg_Move( _ToMove.m_Buffer );
+			m_Buffer = fg_Move(_ToMove.m_Buffer);
 			m_Position = _ToMove.m_Position;
 			m_Length = _ToMove.m_Length;
 			m_BufferSize = _ToMove.m_BufferSize;
@@ -169,7 +170,7 @@ namespace NMib::NStream
 			m_pBuffer = nullptr;
 		}
 
-		void f_Open(CStorage const& _Buffer)
+		void f_Open(CStorage const &_Buffer)
 		{
 			m_Buffer = _Buffer;
 			m_Position = 0;
@@ -212,7 +213,7 @@ namespace NMib::NStream
 				m_Position = _Pos;
 		}
 
-		void f_FeedBytes(const void *_pMem, umint _nBytes)
+		void f_FeedBytes(void const *_pMem, umint _nBytes)
 		{
 			umint CurrentLen = m_BufferSize;
 			umint Position = m_Position;
@@ -328,9 +329,7 @@ namespace NMib::NStream
 			umint CurrentLen = m_Buffer.f_GetLen();
 			umint NeededSize = _NeededBytes + m_Position;
 			if (CurrentLen < NeededSize)
-			{
 				m_Buffer.f_Grow(NeededSize);
-			}
 		}
 
 		void fp_SetPositionInternal(CFilePos _Pos)
@@ -344,6 +343,7 @@ namespace NMib::NStream
 			m_Position = _Pos;
 		}
 		DMibStreamImplementProtected(CBinaryStreamMemoryRef);
+
 	public:
 		DMibStreamImplementOperators(CBinaryStreamMemoryRef);
 
@@ -352,7 +352,7 @@ namespace NMib::NStream
 			return m_Buffer.f_GetArray();
 		}
 
-		const void *f_GetBufferConst() const
+		void const *f_GetBufferConst() const
 		{
 			return m_Buffer.f_GetArray();
 		}
@@ -398,7 +398,6 @@ namespace NMib::NStream
 			m_Position = 0;
 			return (CStorage &&)m_Buffer;
 		}
-
 
 		CBinaryStreamMemoryRef(CStorage &_Buffer)
 			: m_Buffer(_Buffer)
@@ -446,7 +445,7 @@ namespace NMib::NStream
 				m_Position = _Pos;
 		}
 
-		void f_FeedBytes(const void *_pMem, umint _nBytes)
+		void f_FeedBytes(void const *_pMem, umint _nBytes)
 		{
 			fp_GrowBuffer(_nBytes);
 
@@ -456,7 +455,6 @@ namespace NMib::NStream
 			m_Position += _nBytes;
 			if (m_Position > m_Length)
 				m_Length = m_Position;
-
 		}
 
 		void f_ConsumeBytes(void *_pMem, umint _nBytes)
@@ -532,7 +530,6 @@ namespace NMib::NStream
 			}
 			m_Length = _Length;
 		}
-
 	};
 
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault, typename t_CVector = NContainer::CByteVector>
@@ -562,6 +559,7 @@ namespace NMib::NStream
 			m_Position = _Pos;
 		}
 		DMibStreamImplementProtected(CBinaryStreamMemoryConstRef);
+
 	public:
 		DMibStreamImplementOperators(CBinaryStreamMemoryConstRef);
 
@@ -570,7 +568,7 @@ namespace NMib::NStream
 			return m_Buffer.f_GetArray();
 		}
 
-		const void *f_GetBufferConst() const
+		void const *f_GetBufferConst() const
 		{
 			return m_Buffer.f_GetArray();
 		}
@@ -615,7 +613,7 @@ namespace NMib::NStream
 				m_Position = _Pos;
 		}
 
-		void f_FeedBytes(const void *_pMem, umint _nBytes)
+		void f_FeedBytes(void const *_pMem, umint _nBytes)
 		{
 			DMibError("Const stream cannot be written to");
 		}
@@ -623,7 +621,7 @@ namespace NMib::NStream
 		void f_ConsumeBytes(void *_pMem, umint _nBytes)
 		{
 			if (m_Length < (m_Position + _nBytes)) [[unlikely]]
-				this->fp_ThrowEndOfStreamException();;
+				this->fp_ThrowEndOfStreamException();
 
 			if (_nBytes != 0)
 				NMemory::fg_MemCopy(_pMem, m_Buffer.f_GetArray() + m_Position, _nBytes);
@@ -688,7 +686,6 @@ namespace NMib::NStream
 		{
 			DMibError("Const stream cannot change length");
 		}
-
 	};
 
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault>
@@ -703,8 +700,7 @@ namespace NMib::NStream
 		umint m_Length;
 		umint m_MaxLength;
 		aint m_Mode;
-		uint8* m_pMemoryData;
-
+		uint8 *m_pMemoryData;
 
 		void fp_SetPositionInternal(CFilePos _Pos)
 		{
@@ -717,6 +713,7 @@ namespace NMib::NStream
 			m_Position = _Pos;
 		}
 		DMibStreamImplementProtected(CBinaryStreamMemoryPtr);
+
 	public:
 		DMibStreamImplementOperators(CBinaryStreamMemoryPtr);
 
@@ -728,7 +725,7 @@ namespace NMib::NStream
 			m_Length = 0;
 		}
 
-		void f_OpenRead(const void *_pData, umint _Length)
+		void f_OpenRead(void const *_pData, umint _Length)
 		{
 			m_pMemoryData = (uint8 *)_pData;
 			m_Length = _Length;
@@ -758,10 +755,10 @@ namespace NMib::NStream
 			m_MaxLength = _Vector.f_GetLen();
 		}
 
-		void f_FeedBytes(const void *_pMem, umint _nBytes)
+		void f_FeedBytes(void const *_pMem, umint _nBytes)
 		{
 			if (m_MaxLength < (m_Position + _nBytes)) [[unlikely]]
-				this->fp_ThrowEndOfStreamException();;
+				this->fp_ThrowEndOfStreamException();
 
 			if (_nBytes != 0)
 				NMemory::fg_MemCopy(m_pMemoryData + m_Position, _pMem, _nBytes);
@@ -774,7 +771,7 @@ namespace NMib::NStream
 		void f_ConsumeBytes(void *_pMem, umint _nBytes)
 		{
 			if (m_Length < (m_Position + _nBytes)) [[unlikely]]
-				this->fp_ThrowEndOfStreamException();;
+				this->fp_ThrowEndOfStreamException();
 
 			if (_nBytes != 0)
 				NMemory::fg_MemCopy(_pMem, m_pMemoryData + m_Position, _nBytes);
@@ -838,20 +835,21 @@ namespace NMib::NStream
 		void f_SetLength(NStream::CFilePos _Length)
 		{
 			if (_Length > NStream::CFilePos(m_MaxLength)) [[unlikely]]
-				this->fp_ThrowEndOfStreamException();;
+				this->fp_ThrowEndOfStreamException();
 
 			if (_Length > NStream::CFilePos(m_Length))
 				NMemory::fg_SecureMemClear(m_pMemoryData + m_Length, _Length - m_Length);
 			m_Length = _Length;
 		}
+
 		void *f_GetBuffer()
 		{
-			return (void*)m_pMemoryData;
+			return (void *)m_pMemoryData;
 		}
 
-		const void *f_GetBufferConst() const
+		void const *f_GetBufferConst() const
 		{
-			return (const void*)m_pMemoryData;
+			return (void const *)m_pMemoryData;
 		}
 	};
 
@@ -865,8 +863,7 @@ namespace NMib::NStream
 	protected:
 		umint m_Position;
 		umint m_Length;
-		uint8 const* m_pMemoryData;
-
+		uint8 const *m_pMemoryData;
 
 		void fp_SetPositionInternal(CFilePos _Pos)
 		{
@@ -879,8 +876,8 @@ namespace NMib::NStream
 			m_Position = _Pos;
 		}
 		DMibStreamImplementProtected(CBinaryStreamConstMemoryPtr);
-	public:
 
+	public:
 		DMibStreamImplementOperators(CBinaryStreamConstMemoryPtr);
 
 		CBinaryStreamConstMemoryPtr()
@@ -890,7 +887,7 @@ namespace NMib::NStream
 		{
 		}
 
-		CBinaryStreamConstMemoryPtr(CBinaryStreamConstMemoryPtr&& _ToMove)
+		CBinaryStreamConstMemoryPtr(CBinaryStreamConstMemoryPtr &&_ToMove)
 			: m_Position(_ToMove.m_Position)
 			, m_Length(_ToMove.m_Length)
 			, m_pMemoryData(_ToMove.m_pMemoryData)
@@ -900,7 +897,7 @@ namespace NMib::NStream
 			_ToMove.m_pMemoryData = nullptr;
 		}
 
-		CBinaryStreamConstMemoryPtr& operator=(CBinaryStreamConstMemoryPtr&& _ToMove)
+		CBinaryStreamConstMemoryPtr &operator = (CBinaryStreamConstMemoryPtr &&_ToMove)
 		{
 			m_Position = _ToMove.m_Position;
 			m_Length = _ToMove.m_Length;
@@ -911,7 +908,7 @@ namespace NMib::NStream
 			_ToMove.m_pMemoryData = nullptr;
 		}
 
-		void f_OpenRead(const void *_pData, umint _Length)
+		void f_OpenRead(void const *_pData, umint _Length)
 		{
 			m_pMemoryData = (uint8 *)_pData;
 			m_Length = _Length;
@@ -926,7 +923,7 @@ namespace NMib::NStream
 			m_Position = 0;
 		}
 
-		void f_FeedBytes(const void *_pMem, umint _nBytes)
+		void f_FeedBytes(void const *_pMem, umint _nBytes)
 		{
 			DMibError("Const stream cannot be written to");
 		}
@@ -934,7 +931,7 @@ namespace NMib::NStream
 		void f_ConsumeBytes(void *_pMem, umint _nBytes)
 		{
 			if (m_Length < (m_Position + _nBytes)) [[unlikely]]
-				this->fp_ThrowEndOfStreamException();;
+				this->fp_ThrowEndOfStreamException();
 
 			if (_nBytes != 0)
 				NMemory::fg_MemCopy(_pMem, m_pMemoryData + m_Position, _nBytes);
@@ -1006,9 +1003,9 @@ namespace NMib::NStream
 			return nullptr;
 		}
 
-		const void *f_GetBufferConst() const
+		void const *f_GetBufferConst() const
 		{
-			return (const void*)m_pMemoryData;
+			return (void const *)m_pMemoryData;
 		}
 	};
 
@@ -1021,6 +1018,7 @@ namespace NMib::NStream
 		CFilePos m_MaxLength;
 
 		DMibStreamImplementProtected(CBinaryStreamSubStream);
+
 	public:
 		DMibStreamImplementOperators(CBinaryStreamSubStream);
 
@@ -1046,15 +1044,13 @@ namespace NMib::NStream
 			m_pSubStream->f_SetPosition(m_SubPos);
 		}
 
-		void f_FeedBytes(const void *_pMem, umint _nBytes)
+		void f_FeedBytes(void const *_pMem, umint _nBytes)
 		{
 			if (m_MaxLength >= 0)
 			{
 				CFilePos ResultingPos = m_pSubStream->f_GetPosition() + _nBytes;
 				if (ResultingPos > m_SubPos + m_MaxLength)
-				{
 					DMibError("Trying to write outside of stream");
-				}
 			}
 
 			m_pSubStream->f_FeedBytes(_pMem, _nBytes);
@@ -1066,9 +1062,7 @@ namespace NMib::NStream
 			{
 				CFilePos ResultingPos = m_pSubStream->f_GetPosition() + _nBytes;
 				if (ResultingPos > m_SubPos + m_MaxLength)
-				{
 					DMibError("Trying to read outside of stream");
-				}
 			}
 			m_pSubStream->f_ConsumeBytes(_pMem, _nBytes);
 		}
@@ -1098,9 +1092,7 @@ namespace NMib::NStream
 			if (m_MaxLength >= 0)
 			{
 				if (_Pos - m_SubPos > m_MaxLength)
-				{
 					DMibError("Trying to seek outside of stream");
-				}
 			}
 			if (_Pos < 0)
 				DMibError("Trying to seek outside of stream");
@@ -1113,15 +1105,11 @@ namespace NMib::NStream
 			if (m_MaxLength >= 0)
 			{
 				if (_Pos > 0)
-				{
 					DMibError("Trying to seek outside of stream");
-				}
 				ResultingPos = m_SubPos + (m_MaxLength + _Pos);
 			}
 			else
-			{
 				ResultingPos = m_pSubStream->f_GetLength() + _Pos;
-			}
 			if (ResultingPos < m_SubPos)
 				DMibError("Trying to seek outside of stream");
 
@@ -1135,9 +1123,7 @@ namespace NMib::NStream
 			if (m_MaxLength >= 0)
 			{
 				if (ResultingPos > m_SubPos + m_MaxLength)
-				{
 					DMibError("Trying to seek outside of stream");
-				}
 			}
 			if (ResultingPos < m_SubPos)
 				DMibError("Trying to seek outside of stream");
@@ -1150,9 +1136,7 @@ namespace NMib::NStream
 			if (m_MaxLength >= 0)
 			{
 				if (_Pos - m_SubPos >= m_MaxLength)
-				{
 					return false;
-				}
 			}
 			if (_Pos < 0)
 				return false;
@@ -1186,7 +1170,6 @@ namespace NMib::NStream
 		{
 			return m_pSubStream->f_SetLength(m_SubPos + _Length);
 		}
-
 	};
 
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault>
@@ -1198,6 +1181,7 @@ namespace NMib::NStream
 		NContainer::CByteVector m_TempVector;
 
 		DMibStreamImplementProtected(CBinaryStreamCompare);
+
 	public:
 		DMibStreamImplementOperators(CBinaryStreamCompare);
 
@@ -1219,7 +1203,7 @@ namespace NMib::NStream
 			m_pWriteToStream = _pWriteStream;
 		}
 
-		void f_FeedBytes(const void *_pMem, umint _nBytes)
+		void f_FeedBytes(void const *_pMem, umint _nBytes)
 		{
 			m_TempVector.f_SetAtLeastLen(_nBytes);
 
@@ -1321,11 +1305,9 @@ namespace NMib::NStream
 		{
 			return m_pWriteToStream->f_SetLength(_Length);
 		}
-
 	};
-
 }
 
 #ifndef DMibPNoShortCuts
-	using namespace NMib::NStream;
+using namespace NMib::NStream;
 #endif

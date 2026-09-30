@@ -12,17 +12,17 @@ namespace NMib::NStream
 	DMibImpErrorClassDefine(CExceptionStream, NMib::NException::CException);
 	DMibImpErrorClassDefine(CExceptionStreamVersionMismatch, CExceptionStream);
 
-#	define DMibErrorStream(_Description) DMibImpError(NMib::NStream::CExceptionStream, _Description)
+#define DMibErrorStream(_Description) DMibImpError(NMib::NStream::CExceptionStream, _Description)
 
-#	ifndef DMibPNoShortCuts
-#		define DErrorStream(_Description) DMibErrorStream(_Description)
-#	endif
+#ifndef DMibPNoShortCuts
+#	define DErrorStream(_Description) DMibErrorStream(_Description)
+#endif
 
-#	define DMibErrorStreamVersionMismatch(_Description) DMibImpError(NMib::NStream::CExceptionStreamVersionMismatch, _Description)
+#define DMibErrorStreamVersionMismatch(_Description) DMibImpError(NMib::NStream::CExceptionStreamVersionMismatch, _Description)
 
-#	ifndef DMibPNoShortCuts
-#		define DErrorStreamVersionMismatch(_Description) DMibErrorStreamVersionMismatch(_Description)
-#	endif
+#ifndef DMibPNoShortCuts
+#	define DErrorStreamVersionMismatch(_Description) DMibErrorStreamVersionMismatch(_Description)
+#endif
 
 	using CFilePos = CMibFilePos;
 
@@ -42,18 +42,9 @@ namespace NMib::NStream
 	class TCBinaryStreamTypePtr;
 
 	template <typename t_CType>
-	concept cIsValidStreamVersion =
-		(
-			NTraits::cIsEnum<t_CType>
-			&& (sizeof(NTraits::TCEnumUnderlyingType<t_CType>) <= sizeof(uint32))
-			&& !NTraits::cIsSigned<NTraits::TCEnumUnderlyingType<t_CType>>
-		)
-		||
-		(
-			NTraits::cIsInteger<t_CType>
-			&& (sizeof(t_CType) <= sizeof(uint32))
-			&& !NTraits::cIsSigned<t_CType>
-		)
+	concept cIsValidStreamVersion
+		= (NTraits::cIsEnum<t_CType> && (sizeof(NTraits::TCEnumUnderlyingType<t_CType>) <= sizeof(uint32)) && !NTraits::cIsSigned<NTraits::TCEnumUnderlyingType<t_CType>>)
+		|| (NTraits::cIsInteger<t_CType> && (sizeof(t_CType) <= sizeof(uint32)) && !NTraits::cIsSigned<t_CType>)
 	;
 
 	class CBinaryStream;
@@ -62,22 +53,22 @@ namespace NMib::NStream
 	{
 		CScopeBinaryStreamVersion() = delete;
 		CScopeBinaryStreamVersion(CScopeBinaryStreamVersion &&_Other) = delete;
-		CScopeBinaryStreamVersion & operator = (CScopeBinaryStreamVersion &&_Other) = delete;
+		CScopeBinaryStreamVersion &operator = (CScopeBinaryStreamVersion &&_Other) = delete;
 		CScopeBinaryStreamVersion(CScopeBinaryStreamVersion const &_Other) = delete;
-		CScopeBinaryStreamVersion & operator = (CScopeBinaryStreamVersion const &_Other) = delete;
+		CScopeBinaryStreamVersion &operator = (CScopeBinaryStreamVersion const &_Other) = delete;
 
 		constexpr CScopeBinaryStreamVersion(CBinaryStream &_Stream, uint32 _Version);
 
 		template <typename tf_CVersion>
 		constexpr CScopeBinaryStreamVersion(CBinaryStream &_Stream, tf_CVersion _Version)
-			requires(cIsValidStreamVersion<tf_CVersion>)
+			requires (cIsValidStreamVersion<tf_CVersion>)
 		;
 
 		constexpr void f_SetVersion(CBinaryStream &_Stream, uint32 _Version);
 
 		template <typename tf_CVersion>
 		constexpr void f_SetVersion(CBinaryStream &_Stream, tf_CVersion _Version)
-			requires(cIsValidStreamVersion<tf_CVersion>)
+			requires (cIsValidStreamVersion<tf_CVersion>)
 		;
 
 		constexpr ~CScopeBinaryStreamVersion();
@@ -88,41 +79,41 @@ namespace NMib::NStream
 		uint32 mp_OldVersion;
 	};
 
-#	define DMibStreamImplementOperatorsOperators(_Class) \
-		template <typename tf_CData> constexpr inline_small _Class &operator << (tf_CData &&_Data) { this->f_Feed(fg_Forward<tf_CData>(_Data)); return *this; }\
-		template <typename tf_CData> constexpr inline_small _Class &operator >> (tf_CData &&_Data) { this->f_Consume(fg_Forward<tf_CData>(_Data)); return *this; }\
-		template <typename tf_CData> constexpr inline_small _Class &operator << (tf_CData const *_pData) { this->f_Feed(_pData); return *this; }\
-		template <typename tf_CData> constexpr inline_small _Class &operator >> (tf_CData *_pData) { this->f_Consume(_pData); return *this; }\
-		template <typename tf_CData> constexpr inline_small _Class &operator % (tf_CData &&_Data) { this->f_Stream(fg_Forward<tf_CData>(_Data)); return *this; }
+#define DMibStreamImplementOperatorsOperators(_Class) \
+	template <typename tf_CData> constexpr inline_small _Class &operator << (tf_CData &&_Data) { this->f_Feed(fg_Forward<tf_CData>(_Data)); return *this; }\
+	template <typename tf_CData> constexpr inline_small _Class &operator >> (tf_CData &&_Data) { this->f_Consume(fg_Forward<tf_CData>(_Data)); return *this; }\
+	template <typename tf_CData> constexpr inline_small _Class &operator << (tf_CData const *_pData) { this->f_Feed(_pData); return *this; }\
+	template <typename tf_CData> constexpr inline_small _Class &operator >> (tf_CData *_pData) { this->f_Consume(_pData); return *this; }\
+	template <typename tf_CData> constexpr inline_small _Class &operator % (tf_CData &&_Data) { this->f_Stream(fg_Forward<tf_CData>(_Data)); return *this; }
 
-#	define DMibStreamImplementOperators(_Class) \
-		template <typename tf_CData> constexpr inline_small auto f_Feed(tf_CData &&_Data) \
-		{ \
-			return NMib::NStream::TCBinaryStreamTypeReference<_Class, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Feed(*this, NMib::fg_Forward<tf_CData>(_Data)); \
-		} \
-		template <typename tf_CData> constexpr inline_small auto f_Feed(const tf_CData *_pData) \
-		{ \
-			return NMib::NStream::TCBinaryStreamTypePtr<_Class, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Feed(*this, _pData); \
-		} \
-		template <typename tf_CData> constexpr inline_small auto f_Consume(tf_CData &&_Data) \
-		{ \
-			return NMib::NStream::TCBinaryStreamTypeReference<_Class, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Consume(*this, NMib::fg_Forward<tf_CData>(_Data)); \
-		} \
-		template <typename tf_CData> constexpr inline_small auto f_Consume(tf_CData *_pData) \
-		{ \
-			return NMib::NStream::TCBinaryStreamTypePtr<_Class, tf_CData>::fs_Consume(*this, _pData); \
-		} \
-		template <typename tf_CData> constexpr inline_small auto f_Stream(tf_CData &&_Data) \
-		{ \
-			return NMib::NStream::TCBinaryStreamTypeReferenceStream<_Class, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Stream(*this, NMib::fg_Forward<tf_CData>(_Data)); \
-		} \
-		template <typename tf_CData> constexpr inline_small NMib::NStream::CScopeBinaryStreamVersion f_StreamVersion(tf_CData &&_DefaultVersion) \
-		{ \
-			auto Version = _DefaultVersion; \
-			this->f_Stream(Version); \
-			return NMib::NStream::CScopeBinaryStreamVersion(*this, Version); \
-		} \
-		DMibStreamImplementOperatorsOperators(_Class)
+#define DMibStreamImplementOperators(_Class) \
+	template <typename tf_CData> constexpr inline_small auto f_Feed(tf_CData &&_Data) \
+	{ \
+		return NMib::NStream::TCBinaryStreamTypeReference<_Class, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Feed(*this, NMib::fg_Forward<tf_CData>(_Data)); \
+	} \
+	template <typename tf_CData> constexpr inline_small auto f_Feed(const tf_CData *_pData) \
+	{ \
+		return NMib::NStream::TCBinaryStreamTypePtr<_Class, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Feed(*this, _pData); \
+	} \
+	template <typename tf_CData> constexpr inline_small auto f_Consume(tf_CData &&_Data) \
+	{ \
+		return NMib::NStream::TCBinaryStreamTypeReference<_Class, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Consume(*this, NMib::fg_Forward<tf_CData>(_Data)); \
+	} \
+	template <typename tf_CData> constexpr inline_small auto f_Consume(tf_CData *_pData) \
+	{ \
+		return NMib::NStream::TCBinaryStreamTypePtr<_Class, tf_CData>::fs_Consume(*this, _pData); \
+	} \
+	template <typename tf_CData> constexpr inline_small auto f_Stream(tf_CData &&_Data) \
+	{ \
+		return NMib::NStream::TCBinaryStreamTypeReferenceStream<_Class, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Stream(*this, NMib::fg_Forward<tf_CData>(_Data)); \
+	} \
+	template <typename tf_CData> constexpr inline_small NMib::NStream::CScopeBinaryStreamVersion f_StreamVersion(tf_CData &&_DefaultVersion) \
+	{ \
+		auto Version = _DefaultVersion; \
+		this->f_Stream(Version); \
+		return NMib::NStream::CScopeBinaryStreamVersion(*this, Version); \
+	} \
+	DMibStreamImplementOperatorsOperators(_Class)
 
 	template <typename t_CStream, EStreamDirection t_Direction>
 	struct TCStreamDirection : public t_CStream
@@ -132,26 +123,31 @@ namespace NMib::NStream
 		{
 			return TCBinaryStreamTypeReference<t_CStream, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Feed(*this, NMib::fg_Forward<tf_CData>(_Data));
 		}
+
 		template <typename tf_CData>
-		constexpr inline_small auto f_Feed(const tf_CData *_pData)
+		constexpr inline_small auto f_Feed(tf_CData const *_pData)
 		{
 			return TCBinaryStreamTypePtr<t_CStream, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Feed(*this, _pData);
 		}
+
 		template <typename tf_CData>
 		constexpr inline_small auto f_Consume(tf_CData &&_Data)
 		{
 			return TCBinaryStreamTypeReference<t_CStream, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Consume(*this, NMib::fg_Forward<tf_CData>(_Data));
 		}
+
 		template <typename tf_CData>
 		constexpr inline_small auto f_Consume(tf_CData *_pData)
 		{
 			return TCBinaryStreamTypePtr<t_CStream, tf_CData>::fs_Consume(*this, _pData);
 		}
+
 		template <typename tf_CData>
 		constexpr inline_small auto f_Stream(tf_CData &&_Data)
 		{
 			return TCBinaryStreamTypeReferenceStream<t_CStream, NMib::NTraits::TCRemoveReferenceAndQualifiers<tf_CData>>::fs_Stream(*this, NMib::fg_Forward<tf_CData>(_Data));
 		}
+
 		template <typename tf_CData>
 		constexpr inline_small CScopeBinaryStreamVersion f_StreamVersion(tf_CData &&_DefaultVersion)
 		{
@@ -177,13 +173,17 @@ namespace NMib::NStream
 		static constexpr bool mc_bFeed = mc_Direction == EStreamDirection_Feed;
 	};
 
-#	define DMibStreamDeclare(d_Class, d_Stream, d_Direction) extern template void d_Class::f_Stream<NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction>>(NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction> &);
-#	define DMibStreamImplement(d_Class, d_Stream, d_Direction) template void d_Class::f_Stream<NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction>>(NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction> &);
+#define DMibStreamDeclare(d_Class, d_Stream, d_Direction) \
+	extern template void d_Class::f_Stream<NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction>> \
+		(NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction> &);
+#define DMibStreamImplement(d_Class, d_Stream, d_Direction) \
+	template void d_Class::f_Stream<NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction>> \
+		(NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction> &);
 
-#	ifndef DMibPNoShortCuts
-#		define DStreamDeclare DMibStreamDeclare
-#		define DStreamImplement DMibStreamImplement
-#	endif
+#ifndef DMibPNoShortCuts
+#	define DStreamDeclare DMibStreamDeclare
+#	define DStreamImplement DMibStreamImplement
+#endif
 
 	namespace NPrivate
 	{
@@ -202,13 +202,7 @@ namespace NMib::NStream
 		<
 			t_CStream
 			, t_CData
-			, TCEnableIf
-			<
-				!NTraits::cIsSame
-				<
-					decltype(fg_GetReference<NTraits::TCRemoveReferenceAndQualifiers<t_CData>>().f_Stream(fg_GetReference<t_CStream>())), NPrivate::CDummy
-				>
-			>
+			, TCEnableIf<!NTraits::cIsSame<decltype(fg_GetReference<NTraits::TCRemoveReferenceAndQualifiers<t_CData>>().f_Stream(fg_GetReference<t_CStream>())), NPrivate::CDummy>>
 		>
 		{
 			static constexpr bool mc_Value = true;
@@ -221,22 +215,10 @@ namespace NMib::NStream
 		};
 
 		template <typename t_CStream, typename t_CData>
-		struct TCStreamHasStream
-		<
-			t_CStream
-			, t_CData
-			, TCEnableIf
-			<
-				!NTraits::cIsSame
-				<
-					decltype(fg_GetReference<t_CStream>().f_Stream(fg_GetType<t_CData>())), NPrivate::CDummy
-				>
-			>
-		>
+		struct TCStreamHasStream<t_CStream, t_CData, TCEnableIf<!NTraits::cIsSame<decltype(fg_GetReference<t_CStream>().f_Stream(fg_GetType<t_CData>())), NPrivate::CDummy>>>
 		{
 			static constexpr bool mc_Value = true;
 		};
-
 
 		template <typename t_CStream, typename t_CData, typename t_CEnableIf = void>
 		struct TCStreamHasFeed
@@ -244,19 +226,8 @@ namespace NMib::NStream
 			static constexpr bool mc_Value = false;
 		};
 
-		template <typename t_CStream, typename t_CData >
-		struct TCStreamHasFeed
-		<
-			t_CStream
-			, t_CData
-			, TCEnableIf
-			<
-				!NTraits::cIsSame
-				<
-					decltype(fg_GetReference<t_CStream>().f_Feed(fg_GetType<t_CData>())), NPrivate::CDummy
-				>
-			>
-		>
+		template <typename t_CStream, typename t_CData>
+		struct TCStreamHasFeed<t_CStream, t_CData, TCEnableIf<!NTraits::cIsSame<decltype(fg_GetReference<t_CStream>().f_Feed(fg_GetType<t_CData>())), NPrivate::CDummy>>>
 		{
 			static constexpr bool mc_Value = true;
 		};
@@ -267,19 +238,8 @@ namespace NMib::NStream
 			static constexpr bool mc_Value = false;
 		};
 
-		template <typename t_CStream, typename t_CData >
-		struct TCStreamHasConsume
-		<
-			t_CStream
-			, t_CData
-			, TCEnableIf
-			<
-				!NTraits::cIsSame
-				<
-					decltype(fg_GetReference<t_CStream>().f_Consume(fg_GetType<t_CData>())), NPrivate::CDummy
-				>
-			>
-		>
+		template <typename t_CStream, typename t_CData>
+		struct TCStreamHasConsume<t_CStream, t_CData, TCEnableIf<!NTraits::cIsSame<decltype(fg_GetReference<t_CStream>().f_Consume(fg_GetType<t_CData>())), NPrivate::CDummy>>>
 		{
 			static constexpr bool mc_Value = true;
 		};
@@ -291,41 +251,19 @@ namespace NMib::NStream
 	public:
 		// Stream
 
-		template
-		<
-			EStreamDirection t_Direction
-			, typename tf_CData
-			, NMib::TCEnableIf
-			<
-				NPrivate::TCHasStream<TCStreamDirection<t_CStream, t_Direction>, tf_CData>::mc_Value
-			> * = nullptr
-		>
+		template <EStreamDirection t_Direction, typename tf_CData, NMib::TCEnableIf<NPrivate::TCHasStream<TCStreamDirection<t_CStream, t_Direction>, tf_CData>::mc_Value> * = nullptr>
 		inline_small static auto fs_Stream(TCStreamDirection<t_CStream, t_Direction> &_Stream, tf_CData &&_Data)
 		{
 			return fg_Forward<tf_CData>(_Data).f_Stream(_Stream);
 		}
 
-		template
-		<
-			typename tf_CData
-			, NMib::TCEnableIf
-			<
-				!NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Feed>, tf_CData>::mc_Value
-			> * = nullptr
-		>
+		template <typename tf_CData, NMib::TCEnableIf<!NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Feed>, tf_CData>::mc_Value> * = nullptr>
 		inline_small static auto fs_Stream(TCStreamDirection<t_CStream, EStreamDirection_Feed> &_Stream, tf_CData &&_Data)
 		{
 			static_cast<t_CStream &>(_Stream) << fg_ConstOrMove<tf_CData>(fg_Forward<tf_CData>(_Data));
 		}
 
-		template
-		<
-			typename tf_CData
-			, NMib::TCEnableIf
-			<
-				!NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Consume>, tf_CData>::mc_Value
-			> * = nullptr
-		>
+		template <typename tf_CData, NMib::TCEnableIf<!NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Consume>, tf_CData>::mc_Value> * = nullptr>
 		inline_small static auto fs_Stream(TCStreamDirection<t_CStream, EStreamDirection_Consume> &_Stream, tf_CData &&_Data)
 		{
 			static_cast<t_CStream &>(_Stream) >> const_cast<NTraits::TCRemoveReferenceAndQualifiers<tf_CData> &>(_Data);
@@ -361,11 +299,11 @@ namespace NMib::NStream
 			typename tf_CData
 			, NMib::TCEnableIf
 			<
-				!NMib::NTraits::cIsEnum<NTraits::TCRemoveReference<tf_CData>>
-				&& !NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Feed>, tf_CData>::mc_Value
-			> * = nullptr
+				!NMib::NTraits::cIsEnum<NTraits::TCRemoveReference<tf_CData>> && !NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Feed>, tf_CData>::mc_Value
+			>
+			* = nullptr
 		>
-		constexpr inline_small static auto fs_Feed(t_CStream &_Stream, tf_CData &&_Data)
+		static constexpr inline_small auto fs_Feed(t_CStream &_Stream, tf_CData &&_Data)
 		{
 			return fg_Forward<tf_CData>(_Data).f_Feed(_Stream);
 		}
@@ -375,11 +313,11 @@ namespace NMib::NStream
 			typename tf_CData
 			, NMib::TCEnableIf
 			<
-				!NMib::NTraits::cIsEnum<NTraits::TCRemoveReference<tf_CData>>
-				&& NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Feed>, tf_CData>::mc_Value
-			> * = nullptr
+				!NMib::NTraits::cIsEnum<NTraits::TCRemoveReference<tf_CData>> && NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Feed>, tf_CData>::mc_Value
+			>
+			* = nullptr
 		>
-		constexpr inline_small static auto fs_Feed(t_CStream &_Stream, tf_CData &&_Data)
+		static constexpr inline_small auto fs_Feed(t_CStream &_Stream, tf_CData &&_Data)
 		{
 			return const_cast<NTraits::TCRemoveReferenceAndQualifiers<tf_CData> &>(_Data).f_Stream(reinterpret_cast<TCStreamDirection<t_CStream, EStreamDirection_Feed> &>(_Stream));
 		}
@@ -391,11 +329,11 @@ namespace NMib::NStream
 			typename tf_CData
 			, NMib::TCEnableIf
 			<
-				!NMib::NTraits::cIsEnum<NTraits::TCRemoveReference<tf_CData>>
-				&& !NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Consume>, tf_CData>::mc_Value
-			> * = nullptr
+				!NMib::NTraits::cIsEnum<NTraits::TCRemoveReference<tf_CData>> && !NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Consume>, tf_CData>::mc_Value
+			>
+			* = nullptr
 		>
-		constexpr inline_small static auto fs_Consume(t_CStream &_Stream, tf_CData &&_Data)
+		static constexpr inline_small auto fs_Consume(t_CStream &_Stream, tf_CData &&_Data)
 		{
 			return _Data.f_Consume(_Stream);
 		}
@@ -405,17 +343,17 @@ namespace NMib::NStream
 			typename tf_CData
 			, NMib::TCEnableIf
 			<
-				!NMib::NTraits::cIsEnum<NTraits::TCRemoveReference<tf_CData>>
-				&& NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Consume>, tf_CData>::mc_Value
-			> * = nullptr
+				!NMib::NTraits::cIsEnum<NTraits::TCRemoveReference<tf_CData>> && NPrivate::TCHasStream<TCStreamDirection<t_CStream, EStreamDirection_Consume>, tf_CData>::mc_Value
+			>
+			* = nullptr
 		>
-		constexpr inline_small static auto fs_Consume(t_CStream &_Stream, tf_CData &&_Data)
+		static constexpr inline_small auto fs_Consume(t_CStream &_Stream, tf_CData &&_Data)
 		{
 			return fg_Forward<tf_CData>(_Data).f_Stream(reinterpret_cast<TCStreamDirection<t_CStream, EStreamDirection_Consume> &>(_Stream));
 		}
 
 		template <typename tf_CData, NMib::TCEnableIf<NMib::NTraits::cIsEnum<tf_CData>, void> * = nullptr>
-		constexpr inline_small static void fs_Feed(t_CStream &_Stream, tf_CData const &_Data)
+		static constexpr inline_small void fs_Feed(t_CStream &_Stream, tf_CData const &_Data)
 		{
 			if constexpr (NTraits::cIsScopedEnum<tf_CData>)
 				_Stream << NTraits::TCEnumUnderlyingType<tf_CData>(_Data);
@@ -424,7 +362,7 @@ namespace NMib::NStream
 		}
 
 		template <typename tf_CData, NMib::TCEnableIf<NMib::NTraits::cIsEnum<tf_CData>, void> * = nullptr>
-		constexpr inline_small static void fs_Consume(t_CStream &_Stream, tf_CData &_Data)
+		static constexpr inline_small void fs_Consume(t_CStream &_Stream, tf_CData &_Data)
 		{
 			if constexpr (NTraits::cIsScopedEnum<tf_CData>)
 			{
@@ -441,17 +379,17 @@ namespace NMib::NStream
 		}
 	};
 
-
 	template <typename t_CStream, typename t_CData>
 	class TCBinaryStreamTypePtr
 	{
 	public:
-		constexpr static void fs_Feed(t_CStream &_Stream, const t_CData *_pData)
+		static constexpr void fs_Feed(t_CStream &_Stream, t_CData const *_pData)
 		{
 			t_CStream::Implement_Error; // Type not implemented
 			// _Stream.f_FeedBytes(_pData, sizeof(*_pData));
 		}
-		constexpr static void fs_Consume(t_CStream &_Stream, t_CData *_pData)
+
+		static constexpr void fs_Consume(t_CStream &_Stream, t_CData *_pData)
 		{
 			t_CStream::Implement_Error;
 			// _Stream.f_ConsumeBytes(_pData, sizeof(*_pData));
@@ -461,27 +399,28 @@ namespace NMib::NStream
 	template <typename t_CType>
 	class TCBinaryStreamUnsafeWrapper
 	{
-		TCBinaryStreamUnsafeWrapper &operator = (const TCBinaryStreamUnsafeWrapper &_Other)
+		TCBinaryStreamUnsafeWrapper &operator = (TCBinaryStreamUnsafeWrapper const &_Other)
 		{
 		}
+
 	public:
 		using CType = t_CType;
 
 		CType &m_Data;
 		TCBinaryStreamUnsafeWrapper(t_CType &_Data)
-			:m_Data(_Data)
+			: m_Data(_Data)
 		{
 		}
 	};
 
-#	if defined(DMibDebug) && 0
-#		define DMibTempStreamDebug
-#		define DMibTempStreamPre virtual
-#		define DMibTempStreamPost =0
-#	else
-#		define DMibTempStreamPre inline_small
-#		define DMibTempStreamPost
-#	endif
+#if defined(DMibDebug) && 0
+#	define DMibTempStreamDebug
+#	define DMibTempStreamPre virtual
+#	define DMibTempStreamPost =0
+#else
+#	define DMibTempStreamPre inline_small
+#	define DMibTempStreamPost
+#endif
 
 #ifdef DMibTempStreamDebug
 
@@ -535,11 +474,12 @@ namespace NMib::NStream
 		friend struct CScopeBinaryStreamVersion;
 		friend class CScopeBinaryStreamContext;
 		friend class CScopeBinaryStreamContainerLengthLimit;
+
 	public:
 		constexpr CBinaryStream() = default;
 		constexpr virtual ~CBinaryStream() = default;
-	private:
 
+	private:
 		void *m_pContext = nullptr;
 		umint m_ContainerLengthLimit = 0;
 		uint32 m_Version = 0;
@@ -548,7 +488,7 @@ namespace NMib::NStream
 		CBinaryStream &operator = (CBinaryStream const &) = delete;
 
 	protected:
-		virtual void fp_FeedBytes(const void *_pMem, umint _nBytes) = 0;
+		virtual void fp_FeedBytes(void const *_pMem, umint _nBytes) = 0;
 		virtual void fp_ConsumeBytes(void *_pMem, umint _nBytes) = 0;
 		virtual bool fp_IsValid() const = 0;
 		virtual bool fp_IsAtEndOfStream() const = 0;
@@ -561,7 +501,7 @@ namespace NMib::NStream
 		virtual void fp_SetCacheSize(umint _CacheSize) = 0;
 		virtual CFilePos fp_GetLength() const = 0;
 		virtual void fp_SetLength(CFilePos _Length) = 0;
-		virtual	aint fp_LengthSize() const = 0;
+		virtual aint fp_LengthSize() const = 0;
 		virtual aint fp_Endian() const = 0;
 		virtual umint fp_ContainerLengthLimit() const = 0;
 		virtual void fp_FeedFromStream(CBinaryStream &_Stream, CFilePos _nBytes) = 0;
@@ -572,9 +512,8 @@ namespace NMib::NStream
 		}
 
 	public:
-
 #ifdef DMibTempStreamDebug
-		DMibTempStreamPre void f_FeedBytes(const void *_pMem, umint _nBytes) DMibTempStreamPost;
+		DMibTempStreamPre void f_FeedBytes(void const *_pMem, umint _nBytes) DMibTempStreamPost;
 		DMibTempStreamPre void f_ConsumeBytes(void *_pMem, umint _nBytes) DMibTempStreamPost;
 		DMibTempStreamPre bool f_IsValid() const DMibTempStreamPost;
 		DMibTempStreamPre bool f_IsAtEndOfStream() const DMibTempStreamPost;
@@ -592,7 +531,7 @@ namespace NMib::NStream
 		DMibTempStreamPre umint f_ContainerLengthLimit() const DMibTempStreamPost;
 		DMibTempStreamPre void f_FeedFromStream(CBinaryStream &_Stream, CFilePos _nBytes) DMibTempStreamPost;
 #else
-		DMibTempStreamPre void f_FeedBytes(const void *_pMem, umint _nBytes) DMibTempStreamPost
+		DMibTempStreamPre void f_FeedBytes(void const *_pMem, umint _nBytes) DMibTempStreamPost
 		{
 			fp_FeedBytes(_pMem, _nBytes);
 		}
@@ -631,6 +570,7 @@ namespace NMib::NStream
 		{
 			fp_AddPosition(_Pos);
 		}
+
 		DMibTempStreamPre bool f_IsValidReadPosition(NStream::CFilePos _Pos) const
 		{
 			return fp_IsValidReadPosition(_Pos);
@@ -684,7 +624,7 @@ namespace NMib::NStream
 
 		template <typename tf_CVersion>
 		inline_small bool f_SupportsVersion(tf_CVersion _Version) const
-			requires(cIsValidStreamVersion<tf_CVersion>)
+			requires (cIsValidStreamVersion<tf_CVersion>)
 		{
 			return m_Version >= uint32(_Version);
 		}
@@ -728,19 +668,18 @@ namespace NMib::NStream
 		_Stream.f_SetPosition(EndPosition);
 	}
 
-#	define DMibBinaryStreamVersion(_Stream, _Version) NMib::NStream::CScopeBinaryStreamVersion ScopeBinaryStreamVersion(_Stream, _Version)
+#define DMibBinaryStreamVersion(_Stream, _Version) NMib::NStream::CScopeBinaryStreamVersion ScopeBinaryStreamVersion(_Stream, _Version)
 
-#	ifndef DMibPNoShortCuts
-#		define DBinaryStreamVersion(_Stream, _Version) DMibBinaryStreamVersion(_Stream, _Version)
-#	endif
-
+#ifndef DMibPNoShortCuts
+#	define DBinaryStreamVersion(_Stream, _Version) DMibBinaryStreamVersion(_Stream, _Version)
+#endif
 
 	class CScopeBinaryStreamContainerLengthLimit
 	{
 	public:
 		CScopeBinaryStreamContainerLengthLimit() = delete;
-		CScopeBinaryStreamContainerLengthLimit(const CScopeBinaryStreamContainerLengthLimit &_Other) = delete;
-		CScopeBinaryStreamContainerLengthLimit & operator = (CScopeBinaryStreamContainerLengthLimit const &) = delete;
+		CScopeBinaryStreamContainerLengthLimit(CScopeBinaryStreamContainerLengthLimit const &_Other) = delete;
+		CScopeBinaryStreamContainerLengthLimit &operator = (CScopeBinaryStreamContainerLengthLimit const &) = delete;
 
 		CScopeBinaryStreamContainerLengthLimit(CBinaryStream &_Stream, uint32 _ContainerLengthLimit)
 			: mp_pStream(&_Stream)
@@ -748,6 +687,7 @@ namespace NMib::NStream
 			mp_OldContainerLengthLimit = _Stream.m_ContainerLengthLimit;
 			_Stream.m_ContainerLengthLimit = _ContainerLengthLimit;
 		}
+
 		void f_SetContainerLengthLimit(CBinaryStream &_Stream, uint32 _ContainerLengthLimit)
 		{
 			f_Clear();
@@ -755,10 +695,12 @@ namespace NMib::NStream
 			mp_OldContainerLengthLimit = _Stream.m_ContainerLengthLimit;
 			_Stream.m_ContainerLengthLimit = _ContainerLengthLimit;
 		}
+
 		~CScopeBinaryStreamContainerLengthLimit()
 		{
 			f_Clear();
 		}
+
 		void f_Clear()
 		{
 			if (mp_pStream)
@@ -773,18 +715,18 @@ namespace NMib::NStream
 		uint32 mp_OldContainerLengthLimit;
 	};
 
-#	define DMibBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit) NMib::NStream::CScopeBinaryStreamContainerLengthLimit ScopeBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit)
+#define DMibBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit) \
+	NMib::NStream::CScopeBinaryStreamContainerLengthLimit ScopeBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit)
 
-#	ifndef DMibPNoShortCuts
-#		define DBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit) DMibBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit)
-#	endif
-
+#ifndef DMibPNoShortCuts
+#	define DBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit) DMibBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit)
+#endif
 
 	class CScopeBinaryStreamContext
 	{
 	public:
-		CScopeBinaryStreamContext(const CScopeBinaryStreamContext &_Other) = delete;
-		CScopeBinaryStreamContext &operator = (const CScopeBinaryStreamContext &_Other) = delete;
+		CScopeBinaryStreamContext(CScopeBinaryStreamContext const &_Other) = delete;
+		CScopeBinaryStreamContext &operator = (CScopeBinaryStreamContext const &_Other) = delete;
 		CScopeBinaryStreamContext() = delete;
 
 		CScopeBinaryStreamContext(CBinaryStream &_Stream, void *_pContext)
@@ -810,20 +752,22 @@ namespace NMib::NStream
 				m_pStream = nullptr;
 			}
 		}
+
 		~CScopeBinaryStreamContext()
 		{
 			f_Clear();
 		}
+
 	private:
 		CBinaryStream *m_pStream;
 		void *m_pOldContext;
 	};
 
-#	define DMibBinaryStreamContext(_Stream, _Context) NMib::NStream::CScopeBinaryStreamContext ScopeBinaryStreamContext(_Stream, _Context)
+#define DMibBinaryStreamContext(_Stream, _Context) NMib::NStream::CScopeBinaryStreamContext ScopeBinaryStreamContext(_Stream, _Context)
 
-#	ifndef DMibPNoShortCuts
-#		define DBinaryStreamContext(_Stream, _Context) DMibBinaryStreamContext(_Stream, _Context)
-#	endif
+#ifndef DMibPNoShortCuts
+#	define DBinaryStreamContext(_Stream, _Context) DMibBinaryStreamContext(_Stream, _Context)
+#endif
 
 #undef DMibTempStreamDebug
 #undef DMibTempStreamPre
@@ -837,6 +781,7 @@ namespace NMib::NStream
 
 	protected:
 		DMibStreamImplementProtected(CBinaryStreamDefault);
+
 	public:
 		DMibStreamImplementOperators(CBinaryStreamDefault);
 
@@ -887,13 +832,13 @@ namespace NMib::NStream
 
 	protected:
 		DMibStreamImplementProtected(CBinaryStreamDefaultRef);
+
 	public:
 		DMibStreamImplementOperators(CBinaryStreamDefaultRef);
 
 		CBinaryStreamDefaultRef()
 		{
 		}
-
 	};
 
 	class CBinaryStreamBigEndian : public CBinaryStreamDefault
@@ -904,6 +849,7 @@ namespace NMib::NStream
 
 	protected:
 		DMibStreamImplementProtected(CBinaryStreamBigEndian);
+
 	public:
 		DMibStreamImplementOperators(CBinaryStreamBigEndian);
 
@@ -924,8 +870,8 @@ namespace NMib::NStream
 		CBinaryStreamLittleEndian &operator = (CBinaryStreamLittleEndian const &) = delete;
 
 	protected:
-
 		DMibStreamImplementProtected(CBinaryStreamLittleEndian);
+
 	public:
 		DMibStreamImplementOperators(CBinaryStreamLittleEndian);
 
@@ -946,8 +892,8 @@ namespace NMib::NStream
 		CBinaryStreamNativeEndian &operator = (CBinaryStreamNativeEndian const &) = delete;
 
 	protected:
-
 		DMibStreamImplementProtected(CBinaryStreamNativeEndian);
+
 	public:
 		DMibStreamImplementOperators(CBinaryStreamNativeEndian);
 
@@ -980,6 +926,7 @@ namespace NMib::NStream
 			m_Position = _Pos;
 		}
 		DMibStreamImplementProtected(TCBinaryStreamNull);
+
 	public:
 		DMibStreamImplementOperators(TCBinaryStreamNull);
 
@@ -995,17 +942,16 @@ namespace NMib::NStream
 			m_Position = 0;
 		}
 
-		constexpr void f_FeedBytes(const void *_pMem, umint _nBytes)
+		constexpr void f_FeedBytes(void const *_pMem, umint _nBytes)
 		{
 			m_Position += _nBytes;
 			if (m_Position > m_Length)
 				m_Length = m_Position;
-
 		}
 
 		constexpr void f_ConsumeBytes(void *_pMem, umint _nBytes)
 		{
-			if (m_Length < (m_Position + _nBytes) )
+			if (m_Length < (m_Position + _nBytes))
 				DMibError("End of stream Overrun");
 			m_Position += _nBytes;
 		}
@@ -1068,6 +1014,7 @@ namespace NMib::NStream
 			m_Length = _Length;
 		}
 	};
+
 	// Default types
 
 	template <typename tf_CType>
@@ -1082,12 +1029,12 @@ namespace NMib::NStream
 	void fg_FeedLenToStream(t_CStream &_Stream, uint64 _Len)
 	{
 		aint nBytes = _Stream.f_LengthSize();
-		switch(nBytes)
+		switch (nBytes)
 		{
-		case 1:	_Stream << (uint8)_Len; break;
-		case 2:	_Stream << (uint16)_Len; break;
-		case 4:	_Stream << (uint32)_Len; break;
-		case 8:	_Stream << (uint64)_Len; break;
+		case 1: _Stream << (uint8)_Len; break;
+		case 2: _Stream << (uint16)_Len; break;
+		case 4: _Stream << (uint32)_Len; break;
+		case 8: _Stream << (uint64)_Len; break;
 		default: DMibSafeCheck(0, "Unsupported save size"); break;
 		}
 	}
@@ -1119,18 +1066,42 @@ namespace NMib::NStream
 	void fg_ConsumeLenFromStream(t_CStream &_Stream, uint64 &_Len)
 	{
 		aint nBytes = _Stream.f_LengthSize();
-		switch(nBytes)
+		switch (nBytes)
 		{
-		case 1:	{uint8 Len; _Stream >> Len; _Len = Len;} break;
-		case 2:	{uint16 Len; _Stream >> Len; _Len = Len;} break;
-		case 4:	{uint32 Len; _Stream >> Len; _Len = Len;} break;
-		case 8:	{uint64 Len; _Stream >> Len; _Len = Len;} break;
+		case 1:
+			{
+				uint8 Len;
+				_Stream >> Len;
+				_Len = Len;
+			}
+			break;
+		case 2:
+			{
+				uint16 Len;
+				_Stream >> Len;
+				_Len = Len;
+			}
+			break;
+		case 4:
+			{
+				uint32 Len;
+				_Stream >> Len;
+				_Len = Len;
+			}
+			break;
+		case 8:
+			{
+				uint64 Len;
+				_Stream >> Len;
+				_Len = Len;
+			}
+			break;
 		default: DMibSafeCheck(0, "Unsupported save size"); break;
 		}
 	}
 
 	template <typename t_CStream, typename t_CData>
-	void fg_FeedEndianArrayToStream(t_CStream &_Stream, const t_CData *_pData, umint _Len, aint _Endian)
+	void fg_FeedEndianArrayToStream(t_CStream &_Stream, t_CData const *_pData, umint _Len, aint _Endian)
 	{
 		if (_Endian == EEndian_Native || _Endian == gc_MachineEndian)
 		{
@@ -1153,9 +1124,7 @@ namespace NMib::NStream
 		if (_Endian == EEndian_Native || _Endian == gc_MachineEndian)
 			return;
 		else
-		{
 			fg_ByteSwap(_pData, _Len);
-		}
 	}
 
 	static void fg_StrDecodeLenType(uint64 &_Len, uint32 _StreamSize, NStr::EStrType &_Type);
@@ -1165,7 +1134,7 @@ namespace NMib::NStream
 	class TCBinaryStreamTypePtr<t_CStream, ch8>
 	{
 	public:
-		static constexpr void fs_Feed(t_CStream &_Stream, const ch8 *_pData)
+		static constexpr void fs_Feed(t_CStream &_Stream, ch8 const *_pData)
 		{
 			uint64 Len = NMib::NStr::fg_StrLen(_pData);
 			uint64 LenStream = Len;
@@ -1174,6 +1143,7 @@ namespace NMib::NStream
 			if (Len != 0)
 				_Stream.f_FeedBytes(_pData, Len);
 		}
+
 		static constexpr void fs_Consume(t_CStream &_Stream, ch8 *_pData)
 		{
 			uint64 Len;
@@ -1191,7 +1161,7 @@ namespace NMib::NStream
 	class TCBinaryStreamTypePtr<t_CStream, ch16>
 	{
 	public:
-		static constexpr void fs_Feed(t_CStream &_Stream, const ch16 *_pData)
+		static constexpr void fs_Feed(t_CStream &_Stream, ch16 const *_pData)
 		{
 			umint Len = NMib::NStr::fg_StrLen(_pData);
 			uint64 LenStream = Len;
@@ -1199,6 +1169,7 @@ namespace NMib::NStream
 			fg_FeedLenToStream(_Stream, LenStream);
 			fg_FeedEndianArrayToStream(_Stream, _pData, Len, _Stream.f_Endian());
 		}
+
 		static constexpr void fs_Consume(t_CStream &_Stream, ch16 *_pData)
 		{
 			uint64 Len;
@@ -1217,7 +1188,7 @@ namespace NMib::NStream
 	class TCBinaryStreamTypePtr<t_CStream, ch32>
 	{
 	public:
-		static constexpr void fs_Feed(t_CStream &_Stream, const ch32 *_pData)
+		static constexpr void fs_Feed(t_CStream &_Stream, ch32 const *_pData)
 		{
 			umint Len = NMib::NStr::fg_StrLen(_pData);
 			uint64 LenStream = Len;
@@ -1225,6 +1196,7 @@ namespace NMib::NStream
 			fg_FeedLenToStream(_Stream, LenStream);
 			fg_FeedEndianArrayToStream(_Stream, _pData, Len, _Stream.f_Endian());
 		}
+
 		static constexpr void fs_Consume(t_CStream &_Stream, ch32 *_pData)
 		{
 			uint64 Len;
@@ -1240,17 +1212,17 @@ namespace NMib::NStream
 	};
 
 	template <typename t_CStream, typename t_CType>
-	class TCBinaryStreamTypeReference<t_CStream, NMib::NStream::TCBinaryStreamUnsafeWrapper<const t_CType> >
+	class TCBinaryStreamTypeReference<t_CStream, NMib::NStream::TCBinaryStreamUnsafeWrapper<t_CType const>>
 	{
 	public:
-		static constexpr void fs_Feed(t_CStream &_Stream, NMib::NStream::TCBinaryStreamUnsafeWrapper<const t_CType> const &_Data)
+		static constexpr void fs_Feed(t_CStream &_Stream, NMib::NStream::TCBinaryStreamUnsafeWrapper<t_CType const> const &_Data)
 		{
 			_Stream << _Data.m_Data;
 		}
 	};
 
 	template <typename t_CStream, typename t_CType>
-	class TCBinaryStreamTypeReference<t_CStream, NMib::NStream::TCBinaryStreamUnsafeWrapper<t_CType> const >
+	class TCBinaryStreamTypeReference<t_CStream, NMib::NStream::TCBinaryStreamUnsafeWrapper<t_CType> const>
 	{
 	public:
 		static void fs_Consume(t_CStream &_Stream, NMib::NStream::TCBinaryStreamUnsafeWrapper<t_CType> const &_Data)
@@ -1260,17 +1232,19 @@ namespace NMib::NStream
 	};
 
 	template <typename t_CStream, typename t_CType>
-	class TCBinaryStreamTypeReference<t_CStream, NMib::NStream::TCBinaryStreamUnsafeWrapper<t_CType> >
+	class TCBinaryStreamTypeReference<t_CStream, NMib::NStream::TCBinaryStreamUnsafeWrapper<t_CType>>
 	{
 	public:
 		static constexpr void fs_Feed(t_CStream &_Stream, NMib::NStream::TCBinaryStreamUnsafeWrapper<t_CType> const &_Data)
 		{
 			_Stream << _Data.m_Data;
 		}
+
 		static constexpr void fs_Consume(t_CStream &_Stream, NMib::NStream::TCBinaryStreamUnsafeWrapper<t_CType> &_Data)
 		{
 			_Stream >> _Data.m_Data;
 		}
+
 		static constexpr void fs_Consume(t_CStream &_Stream, NMib::NStream::TCBinaryStreamUnsafeWrapper<t_CType> &&_Data)
 		{
 			_Stream >> _Data.m_Data;
@@ -1284,12 +1258,12 @@ namespace NMib::NStream
 	}
 
 	template <typename t_CType>
-	inline_small TCBinaryStreamUnsafeWrapper<const t_CType> fg_GetUnsafeStreamWrapper(const t_CType &_Type)
+	inline_small TCBinaryStreamUnsafeWrapper<t_CType const> fg_GetUnsafeStreamWrapper(t_CType const &_Type)
 	{
-		return TCBinaryStreamUnsafeWrapper<const t_CType>(_Type);
+		return TCBinaryStreamUnsafeWrapper<t_CType const>(_Type);
 	}
 
-#	define DMibStreamImplementSimpleEndianSwappedType(_Type) \
+#define DMibStreamImplementSimpleEndianSwappedType(_Type) \
 	template <typename t_CStream> \
 	class TCBinaryStreamTypeReference<t_CStream, _Type> \
 	{ \
@@ -1319,7 +1293,7 @@ namespace NMib::NStream
 		}\
 	};
 
-#	define DMibStreamImplementSimpleEndianSwappedTypeUnsafe(_Type) \
+#define DMibStreamImplementSimpleEndianSwappedTypeUnsafe(_Type) \
 	template <typename t_CStream> \
 	class TCBinaryStreamTypeReference<t_CStream, NMib::NStream::TCBinaryStreamUnsafeWrapper<const _Type> > \
 	{ \
@@ -1391,8 +1365,7 @@ namespace NMib::NStream
 		}\
 	};
 
-
-#	define DMibStreamImplementSimpleType(_Type) \
+#define DMibStreamImplementSimpleType(_Type) \
 	template <typename t_CStream> \
 	class TCBinaryStreamTypeReference<t_CStream, _Type> \
 	{ \
@@ -1416,6 +1389,7 @@ namespace NMib::NStream
 			uint8 Byte = _Data ? 1 : 0;
 			_Stream.f_FeedBytes(&Byte, sizeof(Byte));
 		}
+
 		static constexpr void fs_Consume(t_CStream &_Stream, bool &_Data)
 		{
 			uint8 Byte;
@@ -1432,7 +1406,6 @@ namespace NMib::NStream
 	DMibStreamImplementSimpleEndianSwappedType(uint16);
 	DMibStreamImplementSimpleEndianSwappedType(uint32);
 	DMibStreamImplementSimpleEndianSwappedType(uint64);
-
 
 #ifdef DMibPUniqueType_mint
 	DMibStreamImplementSimpleEndianSwappedTypeUnsafe(umint);
@@ -1471,9 +1444,8 @@ namespace NMib::NStream
 	DMibStreamImplementSimpleEndianSwappedType(fp32);
 	DMibStreamImplementSimpleEndianSwappedType(fp64);
 
-
 	template <typename t_CStream, typename t_CData, typename t_CTranslator, typename t_CLink, typename t_CLinkInList, bool t_bAutoDelete, typename t_CAllocator>
-	class TCBinaryStreamTypeReference<t_CStream, NIntrusive::TCDLinkListAggregate<t_CData, t_CTranslator, t_CLink, t_CLinkInList, t_bAutoDelete, t_CAllocator> >
+	class TCBinaryStreamTypeReference<t_CStream, NIntrusive::TCDLinkListAggregate<t_CData, t_CTranslator, t_CLink, t_CLinkInList, t_bAutoDelete, t_CAllocator>>
 	{
 	public:
 		static constexpr void fs_Feed(t_CStream &_Stream, NIntrusive::TCDLinkListAggregate<t_CData, t_CTranslator, t_CLink, t_CLinkInList, t_bAutoDelete, t_CAllocator> const &_Data)
@@ -1528,7 +1500,7 @@ namespace NMib::NStream
 			fg_ConsumeLenFromStream(_Stream, nItems);
 			fg_CheckLengthLimit(_Stream, nItems);
 
-			while(nItems)
+			while (nItems)
 			{
 				auto Memory = t_CAllocator::f_AllocSafe(sizeof(t_CData), alignof(t_CData));
 				t_CData *pNewItem = new(Memory.m_pMemory) t_CData();
@@ -1548,7 +1520,7 @@ namespace NMib::NStream
 	};
 
 	template <typename t_CStream, typename t_CData, typename t_CTranslator, typename t_CLink, typename t_CLinkInList, bool t_bAutoDelete, typename t_CAllocator>
-	class TCBinaryStreamTypeReference<t_CStream, NIntrusive::TCDLinkList<t_CData, t_CTranslator, t_CLink, t_CLinkInList, t_bAutoDelete, t_CAllocator> >
+	class TCBinaryStreamTypeReference<t_CStream, NIntrusive::TCDLinkList<t_CData, t_CTranslator, t_CLink, t_CLinkInList, t_bAutoDelete, t_CAllocator>>
 	{
 	public:
 		static constexpr void fs_Feed(t_CStream &_Stream, NIntrusive::TCDLinkList<t_CData, t_CTranslator, t_CLink, t_CLinkInList, t_bAutoDelete, t_CAllocator> const &_Data)
@@ -1634,7 +1606,7 @@ namespace NMib::NStream
 #endif
 
 #ifndef DMibPNoShortCuts
-	using namespace NMib::NStream;
+using namespace NMib::NStream;
 #endif
 
 #include "Malterlib_Stream.hpp"

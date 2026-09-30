@@ -557,7 +557,20 @@ namespace
 					umint Chunk = CBinaryStorage::mc_AdoptThreshold + 3;
 					umint Positions[] =
 						{
-							0, 1, 1, Chunk - 1, Chunk, Chunk + 1, 4 * Chunk + 2, 2 * Chunk - 2, 2 * Chunk - 2, Chunk + 5, 0, Length - 1, 3, 3 * Chunk
+							0
+							, 1
+							, 1
+							, Chunk - 1
+							, Chunk
+							, Chunk + 1
+							, 4 * Chunk + 2
+							, 2 * Chunk - 2
+							, 2 * Chunk - 2
+							, Chunk + 5
+							, 0
+							, Length - 1
+							, 3
+							, 3 * Chunk
 						}
 					;
 					for (umint iPosition = 0; iPosition < sizeof(Positions) / sizeof(Positions[0]); ++iPosition)

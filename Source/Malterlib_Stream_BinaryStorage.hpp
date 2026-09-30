@@ -54,9 +54,7 @@ namespace NMib::NStream
 							_fVisitor(_Data.f_GetArray(), _Data.f_GetLen());
 					}
 					else if constexpr (NTraits::cIsSame<CData, NStorage::TCIndirection<CBinaryStorage>>)
-					{
 						_Data.f_Get().f_VisitSpans(_fVisitor);
-					}
 					else
 					{
 						static_assert(NTraits::cIsSame<CData, NStorage::TCSharedPointer<CBinaryStorage const>>);
@@ -169,7 +167,7 @@ namespace NMib::NStream
 	}
 
 	template <typename t_CStreamType>
-	void TCBinaryStreamStorage<t_CStreamType>::f_FeedBytes(const void *_pMem, umint _nBytes)
+	void TCBinaryStreamStorage<t_CStreamType>::f_FeedBytes(void const *_pMem, umint _nBytes)
 	{
 		if (!_nBytes)
 			return;
@@ -381,7 +379,7 @@ namespace NMib::NStream
 	}
 
 	template <typename t_CStreamType>
-	void TCBinaryStreamStoragePtr<t_CStreamType>::f_FeedBytes(const void *_pMem, umint _nBytes)
+	void TCBinaryStreamStoragePtr<t_CStreamType>::f_FeedBytes(void const *_pMem, umint _nBytes)
 	{
 		DMibError("Binary storage read stream cannot be written to");
 	}
@@ -530,17 +528,7 @@ namespace NMib::NStream
 		};
 
 		template <typename t_CStream>
-		struct TCStreamHasFeedStorage
-		<
-			t_CStream
-			, TCEnableIf
-			<
-				!NTraits::cIsSame
-				<
-					decltype(fg_GetReference<t_CStream>().f_FeedStorage(fg_GetType<CBinaryStorage>())), CDummy
-				>
-			>
-		>
+		struct TCStreamHasFeedStorage<t_CStream, TCEnableIf<!NTraits::cIsSame<decltype(fg_GetReference<t_CStream>().f_FeedStorage(fg_GetType<CBinaryStorage>())), CDummy>>>
 		{
 			static constexpr bool mc_Value = true;
 		};
@@ -552,17 +540,7 @@ namespace NMib::NStream
 		};
 
 		template <typename t_CStream>
-		struct TCStreamHasConsumeStorage
-		<
-			t_CStream
-			, TCEnableIf
-			<
-				!NTraits::cIsSame
-				<
-					decltype(fg_GetReference<t_CStream>().f_ConsumeStorage(fg_GetType<umint>())), CDummy
-				>
-			>
-		>
+		struct TCStreamHasConsumeStorage<t_CStream, TCEnableIf<!NTraits::cIsSame<decltype(fg_GetReference<t_CStream>().f_ConsumeStorage(fg_GetType<umint>())), CDummy>>>
 		{
 			static constexpr bool mc_Value = true;
 		};
@@ -636,9 +614,7 @@ namespace NMib::NStream
 			fg_CheckLengthLimit(_Stream, nItems);
 
 			if constexpr (NPrivate::TCStreamHasConsumeStorage<t_CStream>::mc_Value)
-			{
 				_Data = _Stream.f_ConsumeStorage(nItems);
-			}
 			else
 			{
 #if DMibConfig_IoDebug_Enable
