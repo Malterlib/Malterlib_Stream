@@ -23,7 +23,6 @@ Import "../Core/Lib_Malterlib.MTarget"
 	}
 }
 
-
 Property
 {
 	MalterlibLibrary_Stream: bool = MalterlibLibrary_All
@@ -41,7 +40,7 @@ Property
 Property
 {
 	!!MalterlibEnableInternalTests true
-	
+
 	MalterlibTests =+ "Malterlib_Stream"
 	MalterlibTestFiles_Malterlib_Stream: [type(CEntity)] = ["Test/*"->MakeAbsolute()]
 }

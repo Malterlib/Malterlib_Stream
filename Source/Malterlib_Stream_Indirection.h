@@ -29,5 +29,5 @@ namespace NMib::NStream
 }
 
 #ifndef DMibPNoShortCuts
-	using namespace NMib::NStream;
+using namespace NMib::NStream;
 #endif
