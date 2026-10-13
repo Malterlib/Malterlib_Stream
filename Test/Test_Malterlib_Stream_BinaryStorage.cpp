@@ -538,6 +538,74 @@ namespace
 				}
 
 				{
+					DMibTestPath("SeeksAcrossSpans");
+					CBinaryStorage SpanStorage;
+					uint8 Separator[3] = {1, 2, 3};
+					for (umint iChunk = 0; iChunk < 5; ++iChunk)
+					{
+						SpanStorage.f_AppendVector(fg_MakePattern(CBinaryStorage::mc_AdoptThreshold, uint8(iChunk * 50)));
+						SpanStorage.f_AppendBytes(Separator, 3);
+					}
+
+					CIOByteVector Expected = SpanStorage.f_Flatten();
+					umint Length = Expected.f_GetLen();
+					DMibAssert(SpanStorage.f_GetSpanCount(), >=, umint(10));
+
+					TCBinaryStreamStoragePtr<> Stream;
+					Stream.f_OpenRead(SpanStorage);
+
+					umint Chunk = CBinaryStorage::mc_AdoptThreshold + 3;
+					umint Positions[] =
+						{
+							0, 1, 1, Chunk - 1, Chunk, Chunk + 1, 4 * Chunk + 2, 2 * Chunk - 2, 2 * Chunk - 2, Chunk + 5, 0, Length - 1, 3, 3 * Chunk
+						}
+					;
+					for (umint iPosition = 0; iPosition < sizeof(Positions) / sizeof(Positions[0]); ++iPosition)
+					{
+						umint Position = Positions[iPosition];
+						DMibTestPath("Seek {} to {}"_f << iPosition << Position);
+						Stream.f_SetPosition(Position);
+						uint8 Byte;
+						Stream.f_ConsumeBytes(&Byte, 1);
+						DMibExpect(Byte, ==, Expected[Position]);
+						DMibExpect(Stream.f_GetPosition(), ==, NStream::CFilePos(Position + 1));
+					}
+
+					{
+						DMibTestPath("AddPosition");
+						Stream.f_SetPosition(Chunk - 2);
+						Stream.f_AddPosition(Chunk);
+						uint8 Byte;
+						Stream.f_ConsumeBytes(&Byte, 1);
+						DMibExpect(Byte, ==, Expected[2 * Chunk - 2]);
+
+						Stream.f_AddPosition(-NStream::CFilePos(Chunk));
+						Stream.f_ConsumeBytes(&Byte, 1);
+						DMibExpect(Byte, ==, Expected[Chunk - 1]);
+					}
+
+					{
+						DMibTestPath("End");
+						Stream.f_SetPosition(Length);
+						Stream.f_SetPosition(Length);
+						DMibExpectTrue(Stream.f_IsAtEndOfStream());
+						Stream.f_SetPosition(Length - 1);
+						uint8 Byte;
+						Stream.f_ConsumeBytes(&Byte, 1);
+						DMibExpect(Byte, ==, Expected[Length - 1]);
+					}
+
+					{
+						DMibTestPath("Reopen");
+						Stream.f_OpenRead(Storage);
+						Stream.f_SetPosition(306);
+						uint8 Byte;
+						Stream.f_ConsumeBytes(&Byte, 1);
+						DMibExpect(Byte, ==, uint8(250));
+					}
+				}
+
+				{
 					DMibTestPath("SubRange");
 					TCBinaryStreamStoragePtr<> Stream;
 					Stream.f_OpenRead(Storage, 4, 6);

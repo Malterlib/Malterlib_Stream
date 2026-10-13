@@ -293,8 +293,13 @@ namespace NMib::NStream
 	template <typename t_CStreamType>
 	void TCBinaryStreamStoragePtr<t_CStreamType>::fp_RebuildSpanCache()
 	{
-		umint iSpan = 0;
+		// Seeks are mostly short skips, so the span is searched for from the current one in the direction of mp_Position. Any start
+		// gives the same span, so a current span from before the last f_OpenRead is fine.
 		umint nSpans = mp_Spans.f_GetLen();
+		umint iSpan = fg_Min(mp_iCurrentSpan, nSpans);
+		while (iSpan > 0 && (iSpan == nSpans || mp_Spans[iSpan].m_LogicalStart > mp_Position))
+			--iSpan;
+
 		while (iSpan < nSpans && mp_Spans[iSpan].m_LogicalStart + mp_Spans[iSpan].m_nBytes <= mp_Position)
 			++iSpan;
 
