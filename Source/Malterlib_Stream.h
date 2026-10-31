@@ -177,8 +177,12 @@ namespace NMib::NStream
 		static constexpr bool mc_bFeed = mc_Direction == EStreamDirection_Feed;
 	};
 
-#	define DMibStreamDeclare(d_Class, d_Stream, d_Direction) extern template void d_Class::f_Stream<NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction>>(NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction> &);
-#	define DMibStreamImplement(d_Class, d_Stream, d_Direction) template void d_Class::f_Stream<NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction>>(NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction> &);
+#	define DMibStreamDeclare(d_Class, d_Stream, d_Direction) \
+	extern template void d_Class::f_Stream<NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction>> \
+		(NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction> &);
+#	define DMibStreamImplement(d_Class, d_Stream, d_Direction) \
+	template void d_Class::f_Stream<NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction>> \
+		(NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction> &);
 
 #	ifndef DMibPNoShortCuts
 #		define DStreamDeclare DMibStreamDeclare
@@ -773,7 +777,8 @@ namespace NMib::NStream
 		uint32 mp_OldContainerLengthLimit;
 	};
 
-#	define DMibBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit) NMib::NStream::CScopeBinaryStreamContainerLengthLimit ScopeBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit)
+#	define DMibBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit) \
+	NMib::NStream::CScopeBinaryStreamContainerLengthLimit ScopeBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit)
 
 #	ifndef DMibPNoShortCuts
 #		define DBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit) DMibBinaryStreamContainerLengthLimit(_Stream, _ContainerLengthLimit)
