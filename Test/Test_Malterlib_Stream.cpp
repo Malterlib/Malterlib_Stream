@@ -70,7 +70,6 @@ namespace
 				for (umint i = 0; i < 22728937; ++i)
 					Value6 += "T";
 				{
-
 					OutStream << Value1;
 					OutStream << Value2;
 					OutStream << Value3;
@@ -113,5 +112,4 @@ namespace
 
 	DMibTestRegister(CStream_Tests, Malterlib::Stream);
 }
-
 

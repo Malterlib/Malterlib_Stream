@@ -144,7 +144,7 @@ namespace NMib::NStream
 		void f_FeedStorageShared(NStorage::TCSharedPointer<CBinaryStorage const> &&_pStorage);
 		bool f_CanAdopt() const;
 
-		void f_FeedBytes(const void *_pMem, umint _nBytes);
+		void f_FeedBytes(void const *_pMem, umint _nBytes);
 		void f_ConsumeBytes(void *_pMem, umint _nBytes);
 
 		bool f_IsValid() const;
@@ -186,7 +186,7 @@ namespace NMib::NStream
 		void f_OpenRead(CBinaryStorage const &_Storage);
 		void f_OpenRead(CBinaryStorage const &_Storage, umint _Offset, umint _Length);
 
-		void f_FeedBytes(const void *_pMem, umint _nBytes);
+		void f_FeedBytes(void const *_pMem, umint _nBytes);
 		void f_ConsumeBytes(void *_pMem, umint _nBytes);
 		NContainer::CSharedByteVector f_ConsumeShared(umint _nBytes);
 		NStream::CBinaryStorage f_ConsumeStorage(umint _nBytes);
@@ -220,7 +220,7 @@ namespace NMib::NStream
 
 		NContainer::TCVector<CSpan> mp_Spans;
 		CBinaryStorage const *mp_pStorage = nullptr; // Null until opened.
-		umint mp_OpenOffset = 0; // storage offset of logical position 0
+		umint mp_OpenOffset = 0;                     // storage offset of logical position 0
 		umint mp_Position = 0;
 		umint mp_Length = 0;
 		uint8 const *mp_pCurrent = nullptr;
