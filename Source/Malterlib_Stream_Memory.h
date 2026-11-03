@@ -303,8 +303,8 @@ namespace NMib::NStream
 		}
 
 	private:
-		TCBinaryStreamMemory(TCBinaryStreamMemory const &) = delete;
-		TCBinaryStreamMemory &operator = (TCBinaryStreamMemory const &) = delete;
+		TCBinaryStreamMemory(TCBinaryStreamMemory const &_Other) = delete;
+		TCBinaryStreamMemory &operator = (TCBinaryStreamMemory const &_Other) = delete;
 	};
 
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault, typename t_CVector = NContainer::CByteVector>
@@ -526,8 +526,8 @@ namespace NMib::NStream
 		}
 
 	private:
-		TCBinaryStreamMemoryRef(TCBinaryStreamMemoryRef const &) = delete;
-		TCBinaryStreamMemoryRef &operator = (TCBinaryStreamMemoryRef const &) = delete;
+		TCBinaryStreamMemoryRef(TCBinaryStreamMemoryRef const &_Other) = delete;
+		TCBinaryStreamMemoryRef &operator = (TCBinaryStreamMemoryRef const &_Other) = delete;
 	};
 
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault, typename t_CVector = NContainer::CByteVector>
@@ -681,8 +681,8 @@ namespace NMib::NStream
 		}
 
 	private:
-		TCBinaryStreamMemoryConstRef(TCBinaryStreamMemoryConstRef const &) = delete;
-		TCBinaryStreamMemoryConstRef &operator = (TCBinaryStreamMemoryConstRef const &) = delete;
+		TCBinaryStreamMemoryConstRef(TCBinaryStreamMemoryConstRef const &_Other) = delete;
+		TCBinaryStreamMemoryConstRef &operator = (TCBinaryStreamMemoryConstRef const &_Other) = delete;
 	};
 
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault>
@@ -826,8 +826,8 @@ namespace NMib::NStream
 		}
 
 	private:
-		TCBinaryStreamMemoryPtr(TCBinaryStreamMemoryPtr const &) = delete;
-		TCBinaryStreamMemoryPtr &operator = (TCBinaryStreamMemoryPtr const &) = delete;
+		TCBinaryStreamMemoryPtr(TCBinaryStreamMemoryPtr const &_Other) = delete;
+		TCBinaryStreamMemoryPtr &operator = (TCBinaryStreamMemoryPtr const &_Other) = delete;
 
 	protected:
 		umint m_Position;
@@ -983,8 +983,8 @@ namespace NMib::NStream
 		}
 
 	private:
-		TCBinaryStreamConstMemoryPtr(TCBinaryStreamConstMemoryPtr const &) = delete;
-		TCBinaryStreamConstMemoryPtr &operator = (TCBinaryStreamConstMemoryPtr const &) = delete;
+		TCBinaryStreamConstMemoryPtr(TCBinaryStreamConstMemoryPtr const &_Other) = delete;
+		TCBinaryStreamConstMemoryPtr &operator = (TCBinaryStreamConstMemoryPtr const &_Other) = delete;
 
 	protected:
 		umint m_Position;

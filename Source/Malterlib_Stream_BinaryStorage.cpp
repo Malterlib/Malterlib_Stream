@@ -565,7 +565,7 @@ namespace NMib::NStream
 		umint nSpans = 0;
 		f_VisitSpans
 			(
-				[&](uint8 const *, umint)
+				[&](uint8 const *_pData, umint _nBytes)
 				{
 					++nSpans;
 				}

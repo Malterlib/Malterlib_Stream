@@ -49,8 +49,8 @@ namespace NMib::NStream
 
 		CBinaryStorage &operator = (CBinaryStorage &&_Other);
 
-		CBinaryStorage(CBinaryStorage const &) = delete;
-		CBinaryStorage &operator = (CBinaryStorage const &) = delete;
+		CBinaryStorage(CBinaryStorage const &_Other) = delete;
+		CBinaryStorage &operator = (CBinaryStorage const &_Other) = delete;
 
 		void f_AppendBytes(void const *_pData, umint _nBytes);
 		void f_AppendZeroed(umint _nBytes);
@@ -130,8 +130,8 @@ namespace NMib::NStream
 		TCBinaryStreamStorage(TCBinaryStreamStorage &&_ToMove);
 		TCBinaryStreamStorage &operator = (TCBinaryStreamStorage &&_ToMove);
 
-		TCBinaryStreamStorage(TCBinaryStreamStorage const &) = delete;
-		TCBinaryStreamStorage &operator = (TCBinaryStreamStorage const &) = delete;
+		TCBinaryStreamStorage(TCBinaryStreamStorage const &_Other) = delete;
+		TCBinaryStreamStorage &operator = (TCBinaryStreamStorage const &_Other) = delete;
 
 		CBinaryStorage &f_GetStorage();
 		CBinaryStorage const &f_GetStorage() const;
@@ -180,8 +180,8 @@ namespace NMib::NStream
 
 		TCBinaryStreamStoragePtr() = default;
 
-		TCBinaryStreamStoragePtr(TCBinaryStreamStoragePtr const &) = delete;
-		TCBinaryStreamStoragePtr &operator = (TCBinaryStreamStoragePtr const &) = delete;
+		TCBinaryStreamStoragePtr(TCBinaryStreamStoragePtr const &_Other) = delete;
+		TCBinaryStreamStoragePtr &operator = (TCBinaryStreamStoragePtr const &_Other) = delete;
 
 		void f_OpenRead(CBinaryStorage const &_Storage);
 		void f_OpenRead(CBinaryStorage const &_Storage, umint _Offset, umint _Length);
