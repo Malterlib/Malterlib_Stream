@@ -25,9 +25,8 @@ namespace
 		return Vector;
 	}
 
-	class CBinaryStorage_Tests : public NMib::NTest::CTest
+	struct CBinaryStorage_Tests : public NMib::NTest::CTest
 	{
-	public:
 		void f_DoTests()
 		{
 			DMibTestSuite("LocalWriteMerging")

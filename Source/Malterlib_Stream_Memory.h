@@ -6,13 +6,8 @@
 namespace NMib::NStream
 {
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault, typename t_CVector = NContainer::CByteVector>
-	class CBinaryStreamMemory : public t_CStreamType
+	struct CBinaryStreamMemory : public t_CStreamType
 	{
-	private:
-		CBinaryStreamMemory(CBinaryStreamMemory const &) = delete;
-		CBinaryStreamMemory &operator = (CBinaryStreamMemory const &) = delete;
-
-	public:
 		using CStorage = t_CVector;
 
 	protected:
@@ -306,16 +301,15 @@ namespace NMib::NStream
 			}
 			m_Length = _Length;
 		}
+
+	private:
+		CBinaryStreamMemory(CBinaryStreamMemory const &) = delete;
+		CBinaryStreamMemory &operator = (CBinaryStreamMemory const &) = delete;
 	};
 
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault, typename t_CVector = NContainer::CByteVector>
-	class CBinaryStreamMemoryRef : public t_CStreamType
+	struct CBinaryStreamMemoryRef : public t_CStreamType
 	{
-	private:
-		CBinaryStreamMemoryRef(CBinaryStreamMemoryRef const &) = delete;
-		CBinaryStreamMemoryRef &operator = (CBinaryStreamMemoryRef const &) = delete;
-
-	public:
 		using CStorage = t_CVector;
 
 	protected:
@@ -530,16 +524,15 @@ namespace NMib::NStream
 			}
 			m_Length = _Length;
 		}
+
+	private:
+		CBinaryStreamMemoryRef(CBinaryStreamMemoryRef const &) = delete;
+		CBinaryStreamMemoryRef &operator = (CBinaryStreamMemoryRef const &) = delete;
 	};
 
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault, typename t_CVector = NContainer::CByteVector>
-	class CBinaryStreamMemoryConstRef : public t_CStreamType
+	struct CBinaryStreamMemoryConstRef : public t_CStreamType
 	{
-	private:
-		CBinaryStreamMemoryConstRef(CBinaryStreamMemoryConstRef const &) = delete;
-		CBinaryStreamMemoryConstRef &operator = (CBinaryStreamMemoryConstRef const &) = delete;
-
-	public:
 		using CStorage = t_CVector;
 
 	protected:
@@ -686,35 +679,15 @@ namespace NMib::NStream
 		{
 			DMibError("Const stream cannot change length");
 		}
+
+	private:
+		CBinaryStreamMemoryConstRef(CBinaryStreamMemoryConstRef const &) = delete;
+		CBinaryStreamMemoryConstRef &operator = (CBinaryStreamMemoryConstRef const &) = delete;
 	};
 
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault>
-	class CBinaryStreamMemoryPtr : public t_CStreamType
+	struct CBinaryStreamMemoryPtr : public t_CStreamType
 	{
-	private:
-		CBinaryStreamMemoryPtr(CBinaryStreamMemoryPtr const &) = delete;
-		CBinaryStreamMemoryPtr &operator = (CBinaryStreamMemoryPtr const &) = delete;
-
-	protected:
-		umint m_Position;
-		umint m_Length;
-		umint m_MaxLength;
-		aint m_Mode;
-		uint8 *m_pMemoryData;
-
-		void fp_SetPositionInternal(CFilePos _Pos)
-		{
-			if (_Pos < 0 || fg_SafeLargerThan(_Pos, umint(TCLimitsInt<umint>::mc_Max)))
-				DMibError("Memory stream positions are limited to 0 -> TCLimitsInt<umint>::mc_Max");
-
-			if (_Pos > (CFilePos)m_Length)
-				DMibError("Position is past end of stream");
-
-			m_Position = _Pos;
-		}
-		DMibStreamImplementProtected(CBinaryStreamMemoryPtr);
-
-	public:
 		DMibStreamImplementOperators(CBinaryStreamMemoryPtr);
 
 		CBinaryStreamMemoryPtr()
@@ -851,19 +824,17 @@ namespace NMib::NStream
 		{
 			return (void const *)m_pMemoryData;
 		}
-	};
 
-	template <typename t_CStreamType = NStream::CBinaryStreamDefault>
-	class CBinaryStreamConstMemoryPtr : public t_CStreamType
-	{
 	private:
-		CBinaryStreamConstMemoryPtr(CBinaryStreamConstMemoryPtr const &) = delete;
-		CBinaryStreamConstMemoryPtr &operator = (CBinaryStreamConstMemoryPtr const &) = delete;
+		CBinaryStreamMemoryPtr(CBinaryStreamMemoryPtr const &) = delete;
+		CBinaryStreamMemoryPtr &operator = (CBinaryStreamMemoryPtr const &) = delete;
 
 	protected:
 		umint m_Position;
 		umint m_Length;
-		uint8 const *m_pMemoryData;
+		umint m_MaxLength;
+		aint m_Mode;
+		uint8 *m_pMemoryData;
 
 		void fp_SetPositionInternal(CFilePos _Pos)
 		{
@@ -875,9 +846,12 @@ namespace NMib::NStream
 
 			m_Position = _Pos;
 		}
-		DMibStreamImplementProtected(CBinaryStreamConstMemoryPtr);
+		DMibStreamImplementProtected(CBinaryStreamMemoryPtr);
+	};
 
-	public:
+	template <typename t_CStreamType = NStream::CBinaryStreamDefault>
+	struct CBinaryStreamConstMemoryPtr : public t_CStreamType
+	{
 		DMibStreamImplementOperators(CBinaryStreamConstMemoryPtr);
 
 		CBinaryStreamConstMemoryPtr()
@@ -1007,10 +981,31 @@ namespace NMib::NStream
 		{
 			return (void const *)m_pMemoryData;
 		}
+
+	private:
+		CBinaryStreamConstMemoryPtr(CBinaryStreamConstMemoryPtr const &) = delete;
+		CBinaryStreamConstMemoryPtr &operator = (CBinaryStreamConstMemoryPtr const &) = delete;
+
+	protected:
+		umint m_Position;
+		umint m_Length;
+		uint8 const *m_pMemoryData;
+
+		void fp_SetPositionInternal(CFilePos _Pos)
+		{
+			if (_Pos < 0 || fg_SafeLargerThan(_Pos, umint(TCLimitsInt<umint>::mc_Max)))
+				DMibError("Memory stream positions are limited to 0 -> TCLimitsInt<umint>::mc_Max");
+
+			if (_Pos > (CFilePos)m_Length)
+				DMibError("Position is past end of stream");
+
+			m_Position = _Pos;
+		}
+		DMibStreamImplementProtected(CBinaryStreamConstMemoryPtr);
 	};
 
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault>
-	class CBinaryStreamSubStream : public t_CStreamType
+	struct CBinaryStreamSubStream : public t_CStreamType
 	{
 	protected:
 		CBinaryStream *m_pSubStream;
@@ -1173,7 +1168,7 @@ namespace NMib::NStream
 	};
 
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault>
-	class CBinaryStreamCompare : public t_CStreamType
+	struct CBinaryStreamCompare : public t_CStreamType
 	{
 	protected:
 		CBinaryStream *m_pCompareToStream;

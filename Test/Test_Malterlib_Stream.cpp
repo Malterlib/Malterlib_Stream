@@ -10,9 +10,8 @@ namespace
 	using namespace NMib::NContainer;
 	using namespace NMib::NStr;
 
-	class CStream_Tests : public NMib::NTest::CTest
+	struct CStream_Tests : public NMib::NTest::CTest
 	{
-	public:
 		void f_DoTests()
 		{
 			DMibTestSuite("Wrapper")

@@ -8,9 +8,8 @@
 namespace NMib::NStream
 {
 	template <typename t_CStream, typename t_CType, typename t_CAllocator>
-	class TCBinaryStreamTypeReference<t_CStream, NStorage::TCIndirection<t_CType, t_CAllocator>>
+	struct TCBinaryStreamTypeReference<t_CStream, NStorage::TCIndirection<t_CType, t_CAllocator>>
 	{
-	public:
 		static constexpr void fs_Feed(t_CStream &_Stream, NStorage::TCIndirection<t_CType, t_CAllocator> const &_Data)
 		{
 			_Stream << _Data.f_Get();
