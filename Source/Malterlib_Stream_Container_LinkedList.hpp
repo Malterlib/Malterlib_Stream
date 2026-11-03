@@ -1,0 +1,52 @@
+// Copyright © Unbroken AB
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+#pragma once
+
+namespace NMib::NStream
+{
+	template <typename t_CStream, typename t_CData, typename t_CAllocator>
+	constexpr void TCBinaryStreamTypeReference<t_CStream, NContainer::TCLinkedList<t_CData, t_CAllocator>>::fs_Feed
+		(
+			t_CStream &_Stream
+			, NContainer::TCLinkedList<t_CData, t_CAllocator> const &_Data
+		)
+	{
+		umint nItems = _Data.f_GetLen();
+
+		fg_FeedLenToStream(_Stream, nItems);
+
+		for (auto iItem = _Data.f_GetIterator(); iItem; ++iItem)
+			_Stream << *iItem;
+	}
+
+	template <typename t_CStream, typename t_CData, typename t_CAllocator>
+	constexpr void TCBinaryStreamTypeReference<t_CStream, NContainer::TCLinkedList<t_CData, t_CAllocator>>::fs_Feed
+		(
+			t_CStream &_Stream
+			, NContainer::TCLinkedList<t_CData, t_CAllocator> &&_Data
+		)
+	{
+		umint nItems = _Data.f_GetLen();
+
+		fg_FeedLenToStream(_Stream, nItems);
+
+		for (auto iItem = _Data.f_GetIterator(); iItem; ++iItem)
+			_Stream << fg_Move(*iItem);
+	}
+
+	template <typename t_CStream, typename t_CData, typename t_CAllocator>
+	constexpr void TCBinaryStreamTypeReference<t_CStream, NContainer::TCLinkedList<t_CData, t_CAllocator>>::fs_Consume
+		(
+			t_CStream &_Stream
+			, NContainer::TCLinkedList<t_CData, t_CAllocator> &_Data
+		)
+	{
+		uint64 nItems;
+		fg_ConsumeLenFromStream(_Stream, nItems);
+		fg_CheckLengthLimit(_Stream, nItems);
+
+		for (umint iItem = 0; iItem < nItems; ++iItem)
+			_Stream >> _Data.f_Insert();
+	}
+}

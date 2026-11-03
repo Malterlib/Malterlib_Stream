@@ -10,23 +10,14 @@ namespace NMib::NStream
 	template <typename t_CStream, typename t_CType, typename t_CAllocator>
 	struct TCBinaryStreamTypeReference<t_CStream, NStorage::TCIndirection<t_CType, t_CAllocator>>
 	{
-		static constexpr void fs_Feed(t_CStream &_Stream, NStorage::TCIndirection<t_CType, t_CAllocator> const &_Data)
-		{
-			_Stream << _Data.f_Get();
-		}
-
-		static constexpr void fs_Feed(t_CStream &_Stream, NStorage::TCIndirection<t_CType, t_CAllocator> &&_Data)
-		{
-			_Stream << fg_Move(_Data.f_Get());
-		}
-
-		static constexpr void fs_Consume(t_CStream &_Stream, NStorage::TCIndirection<t_CType, t_CAllocator> &_Data)
-		{
-			_Stream >> _Data.f_Get();
-		}
+		static constexpr void fs_Feed(t_CStream &_Stream, NStorage::TCIndirection<t_CType, t_CAllocator> const &_Data);
+		static constexpr void fs_Feed(t_CStream &_Stream, NStorage::TCIndirection<t_CType, t_CAllocator> &&_Data);
+		static constexpr void fs_Consume(t_CStream &_Stream, NStorage::TCIndirection<t_CType, t_CAllocator> &_Data);
 	};
 }
 
 #ifndef DMibPNoShortCuts
 using namespace NMib::NStream;
 #endif
+
+#include "Malterlib_Stream_Indirection.hpp"
