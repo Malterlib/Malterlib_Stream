@@ -426,8 +426,8 @@ namespace NMib::NStream
 #	define DMibStreamImplementProtected(d_Class) \
 		void fp_FeedBytes(const void *_pMem, umint _nBytes){this->f_FeedBytes(_pMem, _nBytes);}\
 		void fp_ConsumeBytes(void *_pMem, umint _nBytes){this->f_ConsumeBytes(_pMem, _nBytes);}\
-		bool fp_IsValid() const {bool Ret = 0; Ret = this->f_IsValid(); return Ret;}\
-		bool fp_IsAtEndOfStream() const {bool Ret = 0; Ret = this->f_IsAtEndOfStream(); return Ret;}\
+		bool fp_IsValid() const {bool bRet = 0; bRet = this->f_IsValid(); return bRet;}\
+		bool fp_IsAtEndOfStream() const {bool bRet = 0; bRet = this->f_IsAtEndOfStream(); return bRet;}\
 		NMib::NStream::CFilePos fp_GetPosition() const {return this->f_GetPosition();}\
 		void fp_SetPosition(NMib::NStream::CFilePos _Pos){this->f_SetPosition(_Pos);}\
 		void fp_SetPositionFromEnd(NMib::NStream::CFilePos _Pos){this->f_SetPositionFromEnd(_Pos);}\
@@ -447,8 +447,8 @@ namespace NMib::NStream
 #	define DMibStreamImplementProtected(d_Class) \
 		void fp_FeedBytes(const void *_pMem, umint _nBytes){d_Class::f_FeedBytes(_pMem, _nBytes);}\
 		void fp_ConsumeBytes(void *_pMem, umint _nBytes){d_Class::f_ConsumeBytes(_pMem, _nBytes);}\
-		bool fp_IsValid() const {bool Ret = 0; Ret = d_Class::f_IsValid(); return Ret;}\
-		bool fp_IsAtEndOfStream() const {bool Ret = 0; Ret = d_Class::f_IsAtEndOfStream(); return Ret;}\
+		bool fp_IsValid() const {bool bRet = 0; bRet = d_Class::f_IsValid(); return bRet;}\
+		bool fp_IsAtEndOfStream() const {bool bRet = 0; bRet = d_Class::f_IsAtEndOfStream(); return bRet;}\
 		NMib::NStream::CFilePos fp_GetPosition() const {return d_Class::f_GetPosition();}\
 		void fp_SetPosition(NMib::NStream::CFilePos _Pos){d_Class::f_SetPosition(_Pos);}\
 		void fp_SetPositionFromEnd(NMib::NStream::CFilePos _Pos){d_Class::f_SetPositionFromEnd(_Pos);}\
@@ -1363,17 +1363,17 @@ namespace NMib::NStream
 	template <typename t_CStream>
 	struct TCBinaryStreamTypeReference<t_CStream, bool>
 	{
-		static constexpr void fs_Feed(t_CStream &_Stream, bool const &_Data)
+		static constexpr void fs_Feed(t_CStream &_Stream, bool const &_bData)
 		{
-			uint8 Byte = _Data ? 1 : 0;
+			uint8 Byte = _bData ? 1 : 0;
 			_Stream.f_FeedBytes(&Byte, sizeof(Byte));
 		}
 
-		static constexpr void fs_Consume(t_CStream &_Stream, bool &_Data)
+		static constexpr void fs_Consume(t_CStream &_Stream, bool &_bData)
 		{
 			uint8 Byte;
 			_Stream.f_ConsumeBytes(&Byte, sizeof(Byte));
-			_Data = Byte != 0;
+			_bData = Byte != 0;
 		}
 	};
 

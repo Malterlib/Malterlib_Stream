@@ -22,11 +22,11 @@ namespace
 
 				Stream.f_SetPosition(0);
 				umint Test2;
-				ch8 pTest2[200];
+				ch8 Test2Buffer[200];
 				CStr String;
-				Stream >> fg_GetUnsafeStreamWrapper(Test2) >> pTest2 >> String;
+				Stream >> fg_GetUnsafeStreamWrapper(Test2) >> Test2Buffer >> String;
 				DMibTest(DMibExpr(Test2) == DMibExpr(umint(1)));
-				DMibTest(DMibExpr(pTest2) == DMibExpr(CStr("ouoeuaoaa   eeee e")));
+				DMibTest(DMibExpr(Test2Buffer) == DMibExpr(CStr("ouoeuaoaa   eeee e")));
 				DMibTest(DMibExpr(String) == DMibExpr(CStr("Oeuoeuoeu")));
 
 				// We should also be able to read the string as a CStr
