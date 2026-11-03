@@ -8,8 +8,8 @@ namespace NMib::NStream
 	constexpr CScopeBinaryStreamVersion::CScopeBinaryStreamVersion(CBinaryStream &_Stream, uint32 _Version)
 		: mp_pStream(&_Stream)
 	{
-		mp_OldVersion = _Stream.m_Version;
-		_Stream.m_Version = _Version;
+		mp_OldVersion = _Stream.mp_Version;
+		_Stream.mp_Version = _Version;
 	}
 
 	template <typename tf_CVersion>
@@ -23,8 +23,8 @@ namespace NMib::NStream
 	{
 		f_Clear();
 		mp_pStream = &_Stream;
-		mp_OldVersion = _Stream.m_Version;
-		_Stream.m_Version = _Version;
+		mp_OldVersion = _Stream.mp_Version;
+		_Stream.mp_Version = _Version;
 	}
 
 	template <typename tf_CVersion>
@@ -43,7 +43,7 @@ namespace NMib::NStream
 	{
 		if (mp_pStream)
 		{
-			mp_pStream->m_Version = mp_OldVersion;
+			mp_pStream->mp_Version = mp_OldVersion;
 			mp_pStream = nullptr;
 		}
 	}

@@ -34,7 +34,7 @@ namespace NMib::NStream
 			fg_ConsumeLenFromStream(_Stream, nItems);
 			fg_CheckLengthLimit(_Stream, nItems);
 
-			for (umint i = 0; i < nItems; ++i)
+			for (umint iItem = 0; iItem < nItems; ++iItem)
 				_Stream >> _Data.f_Insert();
 		}
 	};

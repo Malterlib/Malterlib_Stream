@@ -33,9 +33,9 @@ namespace NMib::NStream
 	template <typename tf_CType>
 	tf_CType fg_FromByteVector(NContainer::CByteVector const &_Data)
 	{
-		tf_CType ret;
-		fg_FromByteVector(_Data, ret);
-		return ret;
+		tf_CType Return;
+		fg_FromByteVector(_Data, Return);
+		return Return;
 	}
 
 	template <typename tf_CType>
@@ -49,9 +49,9 @@ namespace NMib::NStream
 	template <typename tf_CType>
 	tf_CType fg_FromByteVectorBE(NContainer::CByteVector const &_Data)
 	{
-		tf_CType ret;
-		fg_FromByteVectorBE(_Data, ret);
-		return ret;
+		tf_CType Return;
+		fg_FromByteVectorBE(_Data, Return);
+		return Return;
 	}
 
 	template <typename tf_CType>
@@ -82,9 +82,9 @@ namespace NMib::NStream
 	template <typename tf_CType>
 	tf_CType fg_FromSecureByteVector(NContainer::CSecureByteVector const &_Data)
 	{
-		tf_CType ret;
-		fg_FromSecureByteVector(_Data, ret);
-		return ret;
+		tf_CType Return;
+		fg_FromSecureByteVector(_Data, Return);
+		return Return;
 	}
 
 	template <typename tf_CType>
@@ -98,8 +98,8 @@ namespace NMib::NStream
 	template <typename tf_CType>
 	tf_CType fg_FromSecureByteVectorBE(NContainer::CSecureByteVector const &_Data)
 	{
-		tf_CType ret;
-		fg_FromSecureByteVectorBE(_Data, ret);
-		return ret;
+		tf_CType Return;
+		fg_FromSecureByteVectorBE(_Data, Return);
+		return Return;
 	}
 }

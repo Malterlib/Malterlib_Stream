@@ -38,19 +38,19 @@ namespace
 			DMibTestSuite("Move Construct")
 			{
 				CByteVector Bytes;
-				for (umint i = 0; i < 1000; ++i)
-					Bytes.f_Insert(uint8(i));
+				for (umint iByte = 0; iByte < 1000; ++iByte)
+					Bytes.f_Insert(uint8(iByte));
 
 				TCBinaryStreamMemory<> Stream(NMib::fg_Move(Bytes));
 				DMibExpect(Stream.f_GetLength(), ==, 1000);
 
-				for (umint i = 0; i < 1000; ++i)
+				for (umint iByte = 0; iByte < 1000; ++iByte)
 				{
 					uint8 Value = 0;
 					Stream >> fg_GetUnsafeStreamWrapper(Value);
-					if (Value != uint8(i))
+					if (Value != uint8(iByte))
 					{
-						DMibExpect(Value, ==, uint8(i));
+						DMibExpect(Value, ==, uint8(iByte));
 						break;
 					}
 				}
@@ -66,7 +66,7 @@ namespace
 				uint64 Value4 = 3;
 				CStr Value5 = "Testing";
 				CStr Value6;
-				for (umint i = 0; i < 22728937; ++i)
+				for (umint iChar = 0; iChar < 22728937; ++iChar)
 					Value6 += "T";
 				{
 					OutStream << Value1;

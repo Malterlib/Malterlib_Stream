@@ -474,9 +474,9 @@ namespace NMib::NStream
 		constexpr virtual ~CBinaryStream() = default;
 
 	private:
-		void *m_pContext = nullptr;
-		umint m_ContainerLengthLimit = 0;
-		uint32 m_Version = 0;
+		void *mp_pContext = nullptr;
+		umint mp_ContainerLengthLimit = 0;
+		uint32 mp_Version = 0;
 
 		CBinaryStream(CBinaryStream const &_Other) = delete;
 		CBinaryStream &operator = (CBinaryStream const &_Other) = delete;
@@ -613,25 +613,25 @@ namespace NMib::NStream
 #endif
 		inline_small uint32 f_GetVersion() const
 		{
-			return m_Version;
+			return mp_Version;
 		}
 
 		template <typename tf_CVersion>
 		inline_small bool f_SupportsVersion(tf_CVersion _Version) const
 			requires (cIsValidStreamVersion<tf_CVersion>)
 		{
-			return m_Version >= uint32(_Version);
+			return mp_Version >= uint32(_Version);
 		}
 
 		inline_small void *f_GetContext() const
 		{
-			return m_pContext;
+			return mp_pContext;
 		}
 
 		inline_small umint f_ClaimContainerLengthLimitOverride()
 		{
-			umint Return = m_ContainerLengthLimit;
-			m_ContainerLengthLimit = 0;
+			umint Return = mp_ContainerLengthLimit;
+			mp_ContainerLengthLimit = 0;
 			return Return;
 		}
 
@@ -682,16 +682,16 @@ namespace NMib::NStream
 		CScopeBinaryStreamContainerLengthLimit(CBinaryStream &_Stream, uint32 _ContainerLengthLimit)
 			: mp_pStream(&_Stream)
 		{
-			mp_OldContainerLengthLimit = _Stream.m_ContainerLengthLimit;
-			_Stream.m_ContainerLengthLimit = _ContainerLengthLimit;
+			mp_OldContainerLengthLimit = _Stream.mp_ContainerLengthLimit;
+			_Stream.mp_ContainerLengthLimit = _ContainerLengthLimit;
 		}
 
 		void f_SetContainerLengthLimit(CBinaryStream &_Stream, uint32 _ContainerLengthLimit)
 		{
 			f_Clear();
 			mp_pStream = &_Stream;
-			mp_OldContainerLengthLimit = _Stream.m_ContainerLengthLimit;
-			_Stream.m_ContainerLengthLimit = _ContainerLengthLimit;
+			mp_OldContainerLengthLimit = _Stream.mp_ContainerLengthLimit;
+			_Stream.mp_ContainerLengthLimit = _ContainerLengthLimit;
 		}
 
 		~CScopeBinaryStreamContainerLengthLimit()
@@ -703,7 +703,7 @@ namespace NMib::NStream
 		{
 			if (mp_pStream)
 			{
-				mp_pStream->m_ContainerLengthLimit = mp_OldContainerLengthLimit;
+				mp_pStream->mp_ContainerLengthLimit = mp_OldContainerLengthLimit;
 				mp_pStream = nullptr;
 			}
 		}
@@ -727,26 +727,26 @@ namespace NMib::NStream
 		CScopeBinaryStreamContext() = delete;
 
 		CScopeBinaryStreamContext(CBinaryStream &_Stream, void *_pContext)
-			: m_pStream(&_Stream)
+			: mp_pStream(&_Stream)
 		{
-			m_pOldContext = _Stream.m_pContext;
-			_Stream.m_pContext = _pContext;
+			mp_pOldContext = _Stream.mp_pContext;
+			_Stream.mp_pContext = _pContext;
 		}
 
 		void f_SetContext(CBinaryStream &_Stream, void *_pContext)
 		{
 			f_Clear();
-			m_pStream = &_Stream;
-			m_pOldContext = _Stream.m_pContext;
-			_Stream.m_pContext = _pContext;
+			mp_pStream = &_Stream;
+			mp_pOldContext = _Stream.mp_pContext;
+			_Stream.mp_pContext = _pContext;
 		}
 
 		void f_Clear()
 		{
-			if (m_pStream)
+			if (mp_pStream)
 			{
-				m_pStream->m_pContext = m_pOldContext;
-				m_pStream = nullptr;
+				mp_pStream->mp_pContext = mp_pOldContext;
+				mp_pStream = nullptr;
 			}
 		}
 
@@ -756,8 +756,8 @@ namespace NMib::NStream
 		}
 
 	private:
-		CBinaryStream *m_pStream;
-		void *m_pOldContext;
+		CBinaryStream *mp_pStream;
+		void *mp_pOldContext;
 	};
 
 #define DMibBinaryStreamContext(d_Stream, d_Context) NMib::NStream::CScopeBinaryStreamContext ScopeBinaryStreamContext(d_Stream, d_Context)
@@ -908,26 +908,26 @@ namespace NMib::NStream
 
 		constexpr void f_Reset()
 		{
-			m_Position = 0;
+			mp_Position = 0;
 		}
 
 		constexpr void f_Clear()
 		{
-			m_Position = 0;
+			mp_Position = 0;
 		}
 
 		constexpr void f_FeedBytes(void const *_pMem, umint _nBytes)
 		{
-			m_Position += _nBytes;
-			if (m_Position > m_Length)
-				m_Length = m_Position;
+			mp_Position += _nBytes;
+			if (mp_Position > mp_Length)
+				mp_Length = mp_Position;
 		}
 
 		constexpr void f_ConsumeBytes(void *_pMem, umint _nBytes)
 		{
-			if (m_Length < (m_Position + _nBytes))
+			if (mp_Length < (mp_Position + _nBytes))
 				DMibError("End of stream Overrun");
-			m_Position += _nBytes;
+			mp_Position += _nBytes;
 		}
 
 		constexpr bool f_IsValid() const
@@ -937,12 +937,12 @@ namespace NMib::NStream
 
 		constexpr bool f_IsAtEndOfStream() const
 		{
-			return m_Position == m_Length;
+			return mp_Position == mp_Length;
 		}
 
 		constexpr CFilePos f_GetPosition() const
 		{
-			return m_Position;
+			return mp_Position;
 		}
 
 		constexpr void f_SetPosition(CFilePos _Pos)
@@ -952,17 +952,17 @@ namespace NMib::NStream
 
 		constexpr void f_SetPositionFromEnd(CFilePos _Pos)
 		{
-			fp_SetPositionInternal(m_Length + _Pos);
+			fp_SetPositionInternal(mp_Length + _Pos);
 		}
 
 		constexpr void f_AddPosition(CFilePos _Pos)
 		{
-			fp_SetPositionInternal(m_Position + _Pos);
+			fp_SetPositionInternal(mp_Position + _Pos);
 		}
 
 		constexpr bool f_IsValidReadPosition(NStream::CFilePos _Pos) const
 		{
-			return _Pos >= 0 && _Pos < NStream::CFilePos(m_Length);
+			return _Pos >= 0 && _Pos < NStream::CFilePos(mp_Length);
 		}
 
 		constexpr void f_Flush(bool _bLocalCacheOnly)
@@ -975,7 +975,7 @@ namespace NMib::NStream
 
 		constexpr CFilePos f_GetLength() const
 		{
-			return m_Length;
+			return mp_Length;
 		}
 
 		constexpr umint f_ContainerLengthLimit() const
@@ -985,7 +985,7 @@ namespace NMib::NStream
 
 		constexpr void f_SetLength(NStream::CFilePos _Length)
 		{
-			m_Length = _Length;
+			mp_Length = _Length;
 		}
 
 	private:
@@ -993,15 +993,15 @@ namespace NMib::NStream
 		TCBinaryStreamNull &operator = (TCBinaryStreamNull const &_Other) = delete;
 
 	protected:
-		umint m_Position = 0;
-		umint m_Length = 0;
+		umint mp_Position = 0;
+		umint mp_Length = 0;
 
 		constexpr void fp_SetPositionInternal(CFilePos _Pos)
 		{
 			if (_Pos < 0)
 				DMibError("Memory stream positions are limited to 0 -> TCLimitsInt<umint>::mc_Max");
 
-			m_Position = _Pos;
+			mp_Position = _Pos;
 		}
 		DMibStreamImplementProtected(TCBinaryStreamNull);
 	};
@@ -1101,9 +1101,9 @@ namespace NMib::NStream
 		}
 		else
 		{
-			for (umint i = 0; i < _Len; ++i)
+			for (umint iData = 0; iData < _Len; ++iData)
 			{
-				tf_CData Temp = fg_ByteSwap(_pData[i]);
+				tf_CData Temp = fg_ByteSwap(_pData[iData]);
 				_Stream.f_FeedBytes(&Temp, sizeof(tf_CData));
 			}
 		}

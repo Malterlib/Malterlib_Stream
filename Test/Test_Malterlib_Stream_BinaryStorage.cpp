@@ -19,8 +19,8 @@ namespace
 		Vector.f_SetLen(_nBytes);
 
 		uint8 *pData = Vector.f_GetArray();
-		for (umint i = 0; i < _nBytes; ++i)
-			pData[i] = uint8(_Seed + i);
+		for (umint iByte = 0; iByte < _nBytes; ++iByte)
+			pData[iByte] = uint8(_Seed + iByte);
 
 		return Vector;
 	}
@@ -46,10 +46,10 @@ namespace
 
 				uint8 ReadBack[5];
 				Storage.f_CopyTo(ReadBack, 0, 5);
-				for (umint i = 0; i < 5; ++i)
+				for (umint iByte = 0; iByte < 5; ++iByte)
 				{
-					DMibTestPath("Byte {}"_f << i);
-					DMibExpect(ReadBack[i], ==, uint8(i + 1));
+					DMibTestPath("Byte {}"_f << iByte);
+					DMibExpect(ReadBack[iByte], ==, uint8(iByte + 1));
 				}
 			};
 
@@ -187,8 +187,8 @@ namespace
 					DMibTestPath("PatchInsideLocalSegment");
 					uint8 *pPatch = Storage.f_GetMutableLocalSpan(2, 8);
 					DMibAssertTrue(pPatch != nullptr);
-					for (umint i = 0; i < 8; ++i)
-						pPatch[i] = uint8(0x40 + i);
+					for (umint iByte = 0; iByte < 8; ++iByte)
+						pPatch[iByte] = uint8(0x40 + iByte);
 
 					DMibExpect(Storage.f_GetByte(2), ==, uint8(0x40));
 					DMibExpect(Storage.f_GetByte(9), ==, uint8(0x47));
