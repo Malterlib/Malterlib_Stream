@@ -373,7 +373,7 @@ namespace
 					}
 				;
 
-				CBinaryStreamMemory<> MemoryStream;
+				TCBinaryStreamMemory<> MemoryStream;
 				fSerialize(MemoryStream);
 
 				TCBinaryStreamStorage<> StorageStream;
@@ -387,7 +387,7 @@ namespace
 
 				{
 					DMibTestPath("MovedVectorEquivalence");
-					CBinaryStreamMemory<> MemoryStream2;
+					TCBinaryStreamMemory<> MemoryStream2;
 					TCBinaryStreamStorage<> StorageStream2;
 
 					MemoryStream2 << fg_MakePattern(1000, 17);
@@ -456,7 +456,7 @@ namespace
 
 				{
 					DMibTestPath("MemoryStreamUnchanged");
-					CBinaryStreamMemory<> Stream;
+					TCBinaryStreamMemory<> Stream;
 
 					CIOByteVector Chunk = fg_MakePattern(4096, 3);
 					Stream << fg_Move(Chunk);

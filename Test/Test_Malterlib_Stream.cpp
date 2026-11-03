@@ -16,7 +16,7 @@ namespace
 		{
 			DMibTestSuite("Wrapper")
 			{
-				CBinaryStreamMemory<> Stream;
+				TCBinaryStreamMemory<> Stream;
 
 				Stream << fg_GetUnsafeStreamWrapper((umint)1) << "ouoeuaoaa   eeee e" << CStr("Oeuoeuoeu");
 
@@ -41,7 +41,7 @@ namespace
 				for (umint i = 0; i < 1000; ++i)
 					Bytes.f_Insert(uint8(i));
 
-				CBinaryStreamMemory<> Stream(NMib::fg_Move(Bytes));
+				TCBinaryStreamMemory<> Stream(NMib::fg_Move(Bytes));
 				DMibExpect(Stream.f_GetLength(), ==, 1000);
 
 				for (umint i = 0; i < 1000; ++i)
@@ -58,7 +58,7 @@ namespace
 			};
 			DMibTestSuite("Length Limit")
 			{
-				CBinaryStreamMemory<> OutStream;
+				TCBinaryStreamMemory<> OutStream;
 
 				uint64 Value1 = 0;
 				uint64 Value2 = 1;
@@ -79,7 +79,7 @@ namespace
 
 				auto Data = OutStream.f_MoveVector();
 
-				CBinaryStreamMemoryPtr<> InStreamFull;
+				TCBinaryStreamMemoryPtr<> InStreamFull;
 				InStreamFull.f_OpenRead(Data.f_GetArray(), Data.f_GetLen());
 
 				CBinaryStreamDefault &InStream = InStreamFull;
