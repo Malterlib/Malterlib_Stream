@@ -53,9 +53,7 @@ namespace NMib::NStream
 	{
 		CScopeBinaryStreamVersion() = delete;
 		CScopeBinaryStreamVersion(CScopeBinaryStreamVersion &&_Other) = delete;
-		CScopeBinaryStreamVersion &operator = (CScopeBinaryStreamVersion &&_Other) = delete;
 		CScopeBinaryStreamVersion(CScopeBinaryStreamVersion const &_Other) = delete;
-		CScopeBinaryStreamVersion &operator = (CScopeBinaryStreamVersion const &_Other) = delete;
 
 		constexpr CScopeBinaryStreamVersion(CBinaryStream &_Stream, uint32 _Version);
 
@@ -64,6 +62,11 @@ namespace NMib::NStream
 			requires (cIsValidStreamVersion<tf_CVersion>)
 		;
 
+		constexpr ~CScopeBinaryStreamVersion();
+
+		CScopeBinaryStreamVersion &operator = (CScopeBinaryStreamVersion &&_Other) = delete;
+		CScopeBinaryStreamVersion &operator = (CScopeBinaryStreamVersion const &_Other) = delete;
+
 		constexpr void f_SetVersion(CBinaryStream &_Stream, uint32 _Version);
 
 		template <typename tf_CVersion>
@@ -71,7 +74,6 @@ namespace NMib::NStream
 			requires (cIsValidStreamVersion<tf_CVersion>)
 		;
 
-		constexpr ~CScopeBinaryStreamVersion();
 		constexpr void f_Clear();
 
 	private:
@@ -304,9 +306,10 @@ namespace NMib::NStream
 	{
 		using CType = t_CType;
 
-		CType &m_Data;
 		TCBinaryStreamUnsafeWrapper(t_CType &_Data);
 		TCBinaryStreamUnsafeWrapper &operator = (TCBinaryStreamUnsafeWrapper const &_Other) = delete;
+
+		CType &m_Data;
 	};
 
 #if defined(DMibDebug) && 0
@@ -370,36 +373,6 @@ namespace NMib::NStream
 		constexpr CBinaryStream() = default;
 		constexpr virtual ~CBinaryStream() = default;
 
-	private:
-		void *mp_pContext = nullptr;
-		umint mp_ContainerLengthLimit = 0;
-		uint32 mp_Version = 0;
-
-		CBinaryStream(CBinaryStream const &_Other) = delete;
-		CBinaryStream &operator = (CBinaryStream const &_Other) = delete;
-
-	protected:
-		virtual void fp_FeedBytes(void const *_pMem, umint _nBytes) = 0;
-		virtual void fp_ConsumeBytes(void *_pMem, umint _nBytes) = 0;
-		virtual bool fp_IsValid() const = 0;
-		virtual bool fp_IsAtEndOfStream() const = 0;
-		virtual CFilePos fp_GetPosition() const = 0;
-		virtual void fp_SetPosition(CFilePos _Pos) = 0;
-		virtual void fp_SetPositionFromEnd(CFilePos _Pos) = 0;
-		virtual void fp_AddPosition(CFilePos _Pos) = 0;
-		virtual bool fp_IsValidReadPosition(NStream::CFilePos _Pos) const = 0;
-		virtual void fp_Flush(bool _bLocalCacheOnly) = 0;
-		virtual void fp_SetCacheSize(umint _CacheSize) = 0;
-		virtual CFilePos fp_GetLength() const = 0;
-		virtual void fp_SetLength(CFilePos _Length) = 0;
-		virtual aint fp_LengthSize() const = 0;
-		virtual aint fp_Endian() const = 0;
-		virtual umint fp_ContainerLengthLimit() const = 0;
-		virtual void fp_FeedFromStream(CBinaryStream &_Stream, CFilePos _nBytes) = 0;
-
-		inline_never void fp_ThrowEndOfStreamException();
-
-	public:
 		DMibTempStreamPre void f_FeedBytes(void const *_pMem, umint _nBytes) DMibTempStreamPost;
 		DMibTempStreamPre void f_ConsumeBytes(void *_pMem, umint _nBytes) DMibTempStreamPost;
 		DMibTempStreamPre bool f_IsValid() const DMibTempStreamPost;
@@ -430,10 +403,38 @@ namespace NMib::NStream
 
 		DMibStreamImplementOperators(CBinaryStream);
 
+	protected:
+		virtual void fp_FeedBytes(void const *_pMem, umint _nBytes) = 0;
+		virtual void fp_ConsumeBytes(void *_pMem, umint _nBytes) = 0;
+		virtual bool fp_IsValid() const = 0;
+		virtual bool fp_IsAtEndOfStream() const = 0;
+		virtual CFilePos fp_GetPosition() const = 0;
+		virtual void fp_SetPosition(CFilePos _Pos) = 0;
+		virtual void fp_SetPositionFromEnd(CFilePos _Pos) = 0;
+		virtual void fp_AddPosition(CFilePos _Pos) = 0;
+		virtual bool fp_IsValidReadPosition(NStream::CFilePos _Pos) const = 0;
+		virtual void fp_Flush(bool _bLocalCacheOnly) = 0;
+		virtual void fp_SetCacheSize(umint _CacheSize) = 0;
+		virtual CFilePos fp_GetLength() const = 0;
+		virtual void fp_SetLength(CFilePos _Length) = 0;
+		virtual aint fp_LengthSize() const = 0;
+		virtual aint fp_Endian() const = 0;
+		virtual umint fp_ContainerLengthLimit() const = 0;
+		virtual void fp_FeedFromStream(CBinaryStream &_Stream, CFilePos _nBytes) = 0;
+
+		inline_never void fp_ThrowEndOfStreamException();
+
 	private:
 		friend struct CScopeBinaryStreamVersion;
 		friend struct CScopeBinaryStreamContext;
 		friend struct CScopeBinaryStreamContainerLengthLimit;
+
+		CBinaryStream(CBinaryStream const &_Other) = delete;
+		CBinaryStream &operator = (CBinaryStream const &_Other) = delete;
+
+		void *mp_pContext = nullptr;
+		umint mp_ContainerLengthLimit = 0;
+		uint32 mp_Version = 0;
 	};
 
 	template <typename tf_CStream>
@@ -451,11 +452,13 @@ namespace NMib::NStream
 	{
 		CScopeBinaryStreamContainerLengthLimit() = delete;
 		CScopeBinaryStreamContainerLengthLimit(CScopeBinaryStreamContainerLengthLimit const &_Other) = delete;
-		CScopeBinaryStreamContainerLengthLimit &operator = (CScopeBinaryStreamContainerLengthLimit const &_Other) = delete;
 
 		CScopeBinaryStreamContainerLengthLimit(CBinaryStream &_Stream, uint32 _ContainerLengthLimit);
-		void f_SetContainerLengthLimit(CBinaryStream &_Stream, uint32 _ContainerLengthLimit);
 		~CScopeBinaryStreamContainerLengthLimit();
+
+		CScopeBinaryStreamContainerLengthLimit &operator = (CScopeBinaryStreamContainerLengthLimit const &_Other) = delete;
+
+		void f_SetContainerLengthLimit(CBinaryStream &_Stream, uint32 _ContainerLengthLimit);
 		void f_Clear();
 
 	private:
@@ -473,13 +476,15 @@ namespace NMib::NStream
 	struct CScopeBinaryStreamContext
 	{
 		CScopeBinaryStreamContext(CScopeBinaryStreamContext const &_Other) = delete;
-		CScopeBinaryStreamContext &operator = (CScopeBinaryStreamContext const &_Other) = delete;
 		CScopeBinaryStreamContext() = delete;
 
 		CScopeBinaryStreamContext(CBinaryStream &_Stream, void *_pContext);
+		~CScopeBinaryStreamContext();
+
+		CScopeBinaryStreamContext &operator = (CScopeBinaryStreamContext const &_Other) = delete;
+
 		void f_SetContext(CBinaryStream &_Stream, void *_pContext);
 		void f_Clear();
-		~CScopeBinaryStreamContext();
 
 	private:
 		CBinaryStream *mp_pStream;
@@ -502,32 +507,30 @@ namespace NMib::NStream
 		constexpr inline_small aint f_Endian() const;
 		constexpr inline_small void f_FeedFromStream(CBinaryStream &_Stream, CFilePos _nBytes);
 
-	private:
-		void fp_FeedFromStreamImplementation(CBinaryStream &_Stream, CFilePos _nBytes);
+	protected:
+		DMibStreamImplementProtected(CBinaryStreamDefault);
 
 	private:
 		CBinaryStreamDefault(CBinaryStreamDefault const &_Other) = delete;
 		CBinaryStreamDefault &operator = (CBinaryStreamDefault const &_Other) = delete;
 
-	protected:
-		DMibStreamImplementProtected(CBinaryStreamDefault);
+		void fp_FeedFromStreamImplementation(CBinaryStream &_Stream, CFilePos _nBytes);
 	};
 
 	struct CBinaryStreamDefaultRef : public CBinaryStreamDefault
 	{
-		NStorage::CIntrusiveRefCount m_RefCount;
+		DMibStreamImplementOperators(CBinaryStreamDefaultRef);
 
-	private:
-		CBinaryStreamDefaultRef(CBinaryStreamDefaultRef const &_Other) = delete;
-		CBinaryStreamDefaultRef &operator = (CBinaryStreamDefaultRef const &_Other) = delete;
+		CBinaryStreamDefaultRef();
+
+		NStorage::CIntrusiveRefCount m_RefCount;
 
 	protected:
 		DMibStreamImplementProtected(CBinaryStreamDefaultRef);
 
-	public:
-		DMibStreamImplementOperators(CBinaryStreamDefaultRef);
-
-		CBinaryStreamDefaultRef();
+	private:
+		CBinaryStreamDefaultRef(CBinaryStreamDefaultRef const &_Other) = delete;
+		CBinaryStreamDefaultRef &operator = (CBinaryStreamDefaultRef const &_Other) = delete;
 	};
 
 	struct CBinaryStreamBigEndian : public CBinaryStreamDefault
@@ -537,12 +540,12 @@ namespace NMib::NStream
 		CBinaryStreamBigEndian();
 		inline_small aint f_Endian() const;
 
+	protected:
+		DMibStreamImplementProtected(CBinaryStreamBigEndian);
+
 	private:
 		CBinaryStreamBigEndian(CBinaryStreamBigEndian const &_Other) = delete;
 		CBinaryStreamBigEndian &operator = (CBinaryStreamBigEndian const &_Other) = delete;
-
-	protected:
-		DMibStreamImplementProtected(CBinaryStreamBigEndian);
 	};
 
 	struct CBinaryStreamLittleEndian : public CBinaryStreamDefault
@@ -552,12 +555,12 @@ namespace NMib::NStream
 		CBinaryStreamLittleEndian();
 		inline_small aint f_Endian() const;
 
+	protected:
+		DMibStreamImplementProtected(CBinaryStreamLittleEndian);
+
 	private:
 		CBinaryStreamLittleEndian(CBinaryStreamLittleEndian const &_Other) = delete;
 		CBinaryStreamLittleEndian &operator = (CBinaryStreamLittleEndian const &_Other) = delete;
-
-	protected:
-		DMibStreamImplementProtected(CBinaryStreamLittleEndian);
 	};
 
 	struct CBinaryStreamNativeEndian : public CBinaryStreamDefault
@@ -567,12 +570,12 @@ namespace NMib::NStream
 		CBinaryStreamNativeEndian();
 		inline_small aint f_Endian() const;
 
+	protected:
+		DMibStreamImplementProtected(CBinaryStreamNativeEndian);
+
 	private:
 		CBinaryStreamNativeEndian(CBinaryStreamNativeEndian const &_Other) = delete;
 		CBinaryStreamNativeEndian &operator = (CBinaryStreamNativeEndian const &_Other) = delete;
-
-	protected:
-		DMibStreamImplementProtected(CBinaryStreamNativeEndian);
 	};
 
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault>
@@ -599,16 +602,16 @@ namespace NMib::NStream
 		constexpr umint f_ContainerLengthLimit() const;
 		constexpr void f_SetLength(NStream::CFilePos _Length);
 
-	private:
-		TCBinaryStreamNull(TCBinaryStreamNull const &_Other) = delete;
-		TCBinaryStreamNull &operator = (TCBinaryStreamNull const &_Other) = delete;
-
 	protected:
+		constexpr void fp_SetPositionInternal(CFilePos _Pos);
+		DMibStreamImplementProtected(TCBinaryStreamNull);
+
 		umint mp_Position = 0;
 		umint mp_Length = 0;
 
-		constexpr void fp_SetPositionInternal(CFilePos _Pos);
-		DMibStreamImplementProtected(TCBinaryStreamNull);
+	private:
+		TCBinaryStreamNull(TCBinaryStreamNull const &_Other) = delete;
+		TCBinaryStreamNull &operator = (TCBinaryStreamNull const &_Other) = delete;
 	};
 
 	// Default types
