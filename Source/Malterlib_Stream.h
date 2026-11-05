@@ -143,14 +143,12 @@ namespace NMib::NStream
 		static constexpr bool mc_bFeed = mc_Direction == EStreamDirection_Feed;
 	};
 
-	// NOLINTBEGIN(malterlib-parameter-naming): the check asks for parameter names in explicit instantiations, which have none
 #define DMibStreamDeclare(d_Class, d_Stream, d_Direction) \
 	extern template void d_Class::f_Stream<NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction>> \
 		(NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction> &);
 #define DMibStreamImplement(d_Class, d_Stream, d_Direction) \
 	template void d_Class::f_Stream<NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction>> \
 		(NStream::TCStreamDirection<d_Stream, NStream::EStreamDirection_##d_Direction> &);
-	// NOLINTEND(malterlib-parameter-naming)
 
 #ifndef DMibPNoShortCuts
 #	define DStreamDeclare DMibStreamDeclare
