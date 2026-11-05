@@ -10,22 +10,14 @@ namespace NMib::NStream
 	{
 		using CStorage = t_CVector;
 
-	protected:
-		umint mp_Position;
-		umint mp_Length;
-		umint mp_BufferSize;
-		uint8 *mp_pBuffer;
-
-		CStorage mp_Buffer;
-
-		inline_never void fp_GrowBufferGrow(umint _NeededBytes);
-		inline_small void fp_GrowBuffer(umint _NeededBytes);
-		void fp_SetPositionInternal(CFilePos _Pos);
-		DMibStreamImplementProtected(TCBinaryStreamMemory);
-
-	public:
 		DMibStreamImplementOperators(TCBinaryStreamMemory);
 
+		TCBinaryStreamMemory(CStorage const &_Buffer);
+		TCBinaryStreamMemory(CStorage &&_Buffer);
+		TCBinaryStreamMemory(TCBinaryStreamMemory &&_ToMove);
+		TCBinaryStreamMemory();
+
+		TCBinaryStreamMemory &operator = (TCBinaryStreamMemory &&_ToMove);
 		void *f_GetBuffer();
 		void const *f_GetBufferConst() const;
 		void f_GrowBuffer(umint _nBytes);
@@ -35,11 +27,6 @@ namespace NMib::NStream
 		CStorage f_GetVectorOptimized() const;
 		CStorage f_MoveVector();
 		CStorage f_MoveVectorOptimized();
-		TCBinaryStreamMemory(CStorage const &_Buffer);
-		TCBinaryStreamMemory(CStorage &&_Buffer);
-		TCBinaryStreamMemory(TCBinaryStreamMemory &&_ToMove);
-		TCBinaryStreamMemory &operator = (TCBinaryStreamMemory &&_ToMove);
-		TCBinaryStreamMemory();
 		void f_Open(CStorage const &_Buffer);
 		void f_Open(CStorage &&_Buffer);
 		void f_ResetStream();
@@ -60,6 +47,19 @@ namespace NMib::NStream
 		umint f_ContainerLengthLimit() const;
 		void f_SetLength(NStream::CFilePos _Length);
 
+	protected:
+		inline_never void fp_GrowBufferGrow(umint _NeededBytes);
+		inline_small void fp_GrowBuffer(umint _NeededBytes);
+		void fp_SetPositionInternal(CFilePos _Pos);
+		DMibStreamImplementProtected(TCBinaryStreamMemory);
+
+		umint mp_Position;
+		umint mp_Length;
+		umint mp_BufferSize;
+		uint8 *mp_pBuffer;
+
+		CStorage mp_Buffer;
+
 	private:
 		TCBinaryStreamMemory(TCBinaryStreamMemory const &_Other) = delete;
 		TCBinaryStreamMemory &operator = (TCBinaryStreamMemory const &_Other) = delete;
@@ -70,18 +70,11 @@ namespace NMib::NStream
 	{
 		using CStorage = t_CVector;
 
-	protected:
-		umint mp_Position;
-		umint mp_Length;
-
-		CStorage &mp_Buffer;
-
-		void fp_GrowBuffer(umint _NeededBytes);
-		void fp_SetPositionInternal(CFilePos _Pos);
-		DMibStreamImplementProtected(TCBinaryStreamMemoryRef);
-
-	public:
 		DMibStreamImplementOperators(TCBinaryStreamMemoryRef);
+
+		TCBinaryStreamMemoryRef(CStorage &_Buffer);
+		TCBinaryStreamMemoryRef(CStorage &_Buffer, umint _Length);
+		~TCBinaryStreamMemoryRef();
 
 		void *f_GetBuffer();
 		void const *f_GetBufferConst() const;
@@ -91,9 +84,6 @@ namespace NMib::NStream
 		CStorage f_GetVectorOptimized() const;
 		CStorage &&f_MoveVector();
 		CStorage &&f_MoveVectorOptimized();
-		TCBinaryStreamMemoryRef(CStorage &_Buffer);
-		TCBinaryStreamMemoryRef(CStorage &_Buffer, umint _Length);
-		~TCBinaryStreamMemoryRef();
 		void f_ResetStream();
 		void f_Clear();
 		void f_RemoveData(umint _Pos, umint _Len);
@@ -111,6 +101,16 @@ namespace NMib::NStream
 		CFilePos f_GetLength() const;
 		umint f_ContainerLengthLimit() const;
 		void f_SetLength(NStream::CFilePos _Length);
+
+	protected:
+		void fp_GrowBuffer(umint _NeededBytes);
+		void fp_SetPositionInternal(CFilePos _Pos);
+		DMibStreamImplementProtected(TCBinaryStreamMemoryRef);
+
+		umint mp_Position;
+		umint mp_Length;
+
+		CStorage &mp_Buffer;
 
 	private:
 		TCBinaryStreamMemoryRef(TCBinaryStreamMemoryRef const &_Other) = delete;
@@ -122,23 +122,14 @@ namespace NMib::NStream
 	{
 		using CStorage = t_CVector;
 
-	protected:
-		umint mp_Position;
-		umint mp_Length;
-
-		CStorage const &mp_Buffer;
-
-		void fp_SetPositionInternal(CFilePos _Pos);
-		DMibStreamImplementProtected(TCBinaryStreamMemoryConstRef);
-
-	public:
 		DMibStreamImplementOperators(TCBinaryStreamMemoryConstRef);
+
+		TCBinaryStreamMemoryConstRef(CStorage const &_Buffer);
 
 		void *f_GetBuffer();
 		void const *f_GetBufferConst() const;
 		CStorage f_GetVector() const;
 		CStorage f_GetVectorOptimized() const;
-		TCBinaryStreamMemoryConstRef(CStorage const &_Buffer);
 		void f_ResetStream();
 		void f_Clear();
 		void f_RemoveData(umint _Pos, umint _Len);
@@ -156,6 +147,15 @@ namespace NMib::NStream
 		CFilePos f_GetLength() const;
 		umint f_ContainerLengthLimit() const;
 		void f_SetLength(NStream::CFilePos _Length);
+
+	protected:
+		void fp_SetPositionInternal(CFilePos _Pos);
+		DMibStreamImplementProtected(TCBinaryStreamMemoryConstRef);
+
+		umint mp_Position;
+		umint mp_Length;
+
+		CStorage const &mp_Buffer;
 
 	private:
 		TCBinaryStreamMemoryConstRef(TCBinaryStreamMemoryConstRef const &_Other) = delete;
@@ -193,19 +193,19 @@ namespace NMib::NStream
 		void *f_GetBuffer();
 		void const *f_GetBufferConst() const;
 
-	private:
-		TCBinaryStreamMemoryPtr(TCBinaryStreamMemoryPtr const &_Other) = delete;
-		TCBinaryStreamMemoryPtr &operator = (TCBinaryStreamMemoryPtr const &_Other) = delete;
-
 	protected:
+		void fp_SetPositionInternal(CFilePos _Pos);
+		DMibStreamImplementProtected(TCBinaryStreamMemoryPtr);
+
 		umint mp_Position;
 		umint mp_Length;
 		umint mp_MaxLength;
 		aint mp_Mode;
 		uint8 *mp_pMemoryData;
 
-		void fp_SetPositionInternal(CFilePos _Pos);
-		DMibStreamImplementProtected(TCBinaryStreamMemoryPtr);
+	private:
+		TCBinaryStreamMemoryPtr(TCBinaryStreamMemoryPtr const &_Other) = delete;
+		TCBinaryStreamMemoryPtr &operator = (TCBinaryStreamMemoryPtr const &_Other) = delete;
 	};
 
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault>
@@ -237,30 +237,22 @@ namespace NMib::NStream
 		void *f_GetBuffer();
 		void const *f_GetBufferConst() const;
 
-	private:
-		TCBinaryStreamConstMemoryPtr(TCBinaryStreamConstMemoryPtr const &_Other) = delete;
-		TCBinaryStreamConstMemoryPtr &operator = (TCBinaryStreamConstMemoryPtr const &_Other) = delete;
-
 	protected:
+		void fp_SetPositionInternal(CFilePos _Pos);
+		DMibStreamImplementProtected(TCBinaryStreamConstMemoryPtr);
+
 		umint mp_Position;
 		umint mp_Length;
 		uint8 const *mp_pMemoryData;
 
-		void fp_SetPositionInternal(CFilePos _Pos);
-		DMibStreamImplementProtected(TCBinaryStreamConstMemoryPtr);
+	private:
+		TCBinaryStreamConstMemoryPtr(TCBinaryStreamConstMemoryPtr const &_Other) = delete;
+		TCBinaryStreamConstMemoryPtr &operator = (TCBinaryStreamConstMemoryPtr const &_Other) = delete;
 	};
 
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault>
 	struct TCBinaryStreamSubStream : public t_CStreamType
 	{
-	protected:
-		CBinaryStream *mp_pSubStream;
-		CFilePos mp_SubPos;
-		CFilePos mp_MaxLength;
-
-		DMibStreamImplementProtected(TCBinaryStreamSubStream);
-
-	public:
 		DMibStreamImplementOperators(TCBinaryStreamSubStream);
 
 		TCBinaryStreamSubStream();
@@ -280,19 +272,18 @@ namespace NMib::NStream
 		CFilePos f_GetLength() const;
 		umint f_ContainerLengthLimit() const;
 		void f_SetLength(NStream::CFilePos _Length);
+
+	protected:
+		DMibStreamImplementProtected(TCBinaryStreamSubStream);
+
+		CBinaryStream *mp_pSubStream;
+		CFilePos mp_SubPos;
+		CFilePos mp_MaxLength;
 	};
 
 	template <typename t_CStreamType = NStream::CBinaryStreamDefault>
 	struct TCBinaryStreamCompare : public t_CStreamType
 	{
-	protected:
-		CBinaryStream *mp_pCompareToStream;
-		CBinaryStream *mp_pWriteToStream;
-		NContainer::CByteVector mp_TempVector;
-
-		DMibStreamImplementProtected(TCBinaryStreamCompare);
-
-	public:
 		DMibStreamImplementOperators(TCBinaryStreamCompare);
 
 		TCBinaryStreamCompare();
@@ -312,6 +303,13 @@ namespace NMib::NStream
 		CFilePos f_GetLength() const;
 		umint f_ContainerLengthLimit() const;
 		void f_SetLength(NStream::CFilePos _Length);
+
+	protected:
+		DMibStreamImplementProtected(TCBinaryStreamCompare);
+
+		CBinaryStream *mp_pCompareToStream;
+		CBinaryStream *mp_pWriteToStream;
+		NContainer::CByteVector mp_TempVector;
 	};
 }
 

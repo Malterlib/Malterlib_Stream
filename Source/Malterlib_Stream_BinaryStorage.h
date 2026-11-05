@@ -46,10 +46,9 @@ namespace NMib::NStream
 		explicit CBinaryStorage(NContainer::CIOByteVector &&_Vector);
 
 		CBinaryStorage(CBinaryStorage &&_Other);
+		CBinaryStorage(CBinaryStorage const &_Other) = delete;
 
 		CBinaryStorage &operator = (CBinaryStorage &&_Other);
-
-		CBinaryStorage(CBinaryStorage const &_Other) = delete;
 		CBinaryStorage &operator = (CBinaryStorage const &_Other) = delete;
 
 		void f_AppendBytes(void const *_pData, umint _nBytes);
@@ -128,9 +127,9 @@ namespace NMib::NStream
 
 		explicit TCBinaryStreamStorage(CBinaryStorage &&_Storage);
 		TCBinaryStreamStorage(TCBinaryStreamStorage &&_ToMove);
-		TCBinaryStreamStorage &operator = (TCBinaryStreamStorage &&_ToMove);
-
 		TCBinaryStreamStorage(TCBinaryStreamStorage const &_Other) = delete;
+
+		TCBinaryStreamStorage &operator = (TCBinaryStreamStorage &&_ToMove);
 		TCBinaryStreamStorage &operator = (TCBinaryStreamStorage const &_Other) = delete;
 
 		CBinaryStorage &f_GetStorage();
